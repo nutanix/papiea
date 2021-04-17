@@ -1,3 +1,4 @@
+- Version 0.9.57+2229: Merge pull request #682 from nutanix/josh/larger-request-sizes PR url: git@github.com:nutanix/papiea.git/pull/682
 - Version 0.9.56+2222: Modified logic and design for update status operation (#677) PR url: git@github.com:nutanix/papiea.git/pull/677
 - Version 0.9.55+2204: Fixed deep copy bug in diff sanitizer and modified input for on_delete handler. (#678) PR url: git@github.com:nutanix/papiea.git/pull/678
 - Version 0.9.54+2193: Fix error details swallowing in papiea (#636) PR url: git@github.com:nutanix/papiea.git/pull/636
