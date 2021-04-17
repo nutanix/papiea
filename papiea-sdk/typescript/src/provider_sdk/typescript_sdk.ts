@@ -394,7 +394,7 @@ class Provider_Server_Manager {
     }
 
     init_express() {
-        this.app.use(express.json())
+        this.app.use(express.json({limit: "16mb"})) // same as papiea-engine
     }
 
     private escape_sfs_path(path: string) {

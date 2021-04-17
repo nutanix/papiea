@@ -52,7 +52,7 @@ async function setUpApplication(): Promise<express.Express> {
     const auditLogger: AuditLogger = new AuditLogger(logger, papieaDebug)
     const app = express();
     app.use(cookieParser());
-    app.use(express.json());
+    app.use(express.json({limit: "16mb"})); // same as mongo document size
     app.use(auditLogger.middleware());
     const mongoConnection: MongoConnection = new MongoConnection(mongoUrl, mongoDb);
     await mongoConnection.connect();
