@@ -56,12 +56,12 @@ export class IntentWatcher_DB_Mongo implements IntentWatcher_DB {
     }
 
 
-    async list_watchers(fields_map: any, sortParams?: SortParams): Promise<IntentWatcher[]> {
+    list_watchers(fields_map: any, sortParams?: SortParams): AsyncIterable<IntentWatcher> {
         const filter: any = Object.assign({}, fields_map);
         if (sortParams) {
-            return await this.collection.find(filter).sort(sortParams).toArray();
+            return this.collection.find(filter).sort(sortParams);
         } else {
-            return await this.collection.find(filter).toArray();
+            return this.collection.find(filter);
         }
     }
 

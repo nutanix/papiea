@@ -12,13 +12,13 @@ export interface Entity_API {
 
     get_entity_status(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, context: RequestContext): Promise<[Metadata, Status]>
 
-    filter_intent_watcher(user: UserAuthInfo, fields: any, context: RequestContext, sortParams?: SortParams): Promise<Partial<IntentWatcher>[]>
+    filter_intent_watcher(user: UserAuthInfo, fields: any, context: RequestContext, sortParams?: SortParams): AsyncIterable<Partial<IntentWatcher>>
 
-    filter_entity_spec(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): Promise<[Metadata, Spec][]>
+    filter_entity_spec(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): AsyncIterable<[Metadata, Spec]>
 
-    filter_entity_status(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): Promise<[Metadata, Status][]>
+    filter_entity_status(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): AsyncIterable<[Metadata, Status]>
 
-    filter_deleted(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): Promise<Entity[]>
+    filter_deleted(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): AsyncIterable<Entity>
 
     update_entity_spec(user: UserAuthInfo, uuid: uuid4, prefix: string, spec_version: number, extension: {[key: string]: any}, kind_name: string, version: Version, spec_description: Spec, context: RequestContext): Promise<EntityCreateOrUpdateResult>
 

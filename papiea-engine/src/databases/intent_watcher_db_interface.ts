@@ -5,7 +5,7 @@ export interface IntentWatcher_DB {
 
     save_watcher(watcher: IntentWatcher): Promise<void>
 
-    list_watchers(fields_map: any, sortParams?: SortParams): Promise<IntentWatcher[]>
+    list_watchers(fields_map: any, sortParams?: SortParams): AsyncIterable<IntentWatcher>
 
     get_watcher(uuid: string): Promise<IntentWatcher>
 

@@ -5,15 +5,7 @@ import {Action, Provider, IntentWatcher, Entity, Provider_Entity_Reference} from
 import {PermissionDeniedError, UnauthorizedError} from "../errors/permission_error"
 import {BadRequestError} from "../errors/bad_request_error"
 import {Logger} from "papiea-backend-utils"
-
-function mapAsync<T, U>(array: T[], callbackfn: (value: T, index: number, array: T[]) => Promise<U>): Promise<U[]> {
-    return Promise.all(array.map(callbackfn));
-}
-
-async function filterAsync<T>(array: T[], callbackfn: (value: T, index: number, array: T[]) => Promise<boolean>): Promise<T[]> {
-    const filterMap = await mapAsync(array, callbackfn);
-    return array.filter((value, index) => filterMap[index]);
-}
+import * as Async from '../utils/async'
 
 export abstract class Authorizer {
     constructor() {
@@ -21,8 +13,8 @@ export abstract class Authorizer {
 
     abstract checkPermission(user: UserAuthInfo, object: any, action: Action, provider?: Provider): Promise<void>;
 
-    async filter(logger: Logger, user: UserAuthInfo, objectList: any[], action: Action, provider?: Provider, transformfn?: (object: any) => any): Promise<any[]> {
-        return filterAsync(objectList, async (object) => {
+    filter<T>(logger: Logger, user: UserAuthInfo, objectList: Async.AnyIterable<T>, action: Action, provider?: Provider, transformfn?: (object: any) => any): AsyncIterable<T> {
+        return Async.filter(objectList, async (object) => {
             try {
                 if (transformfn) {
                     await this.checkPermission(user, transformfn(object), action, provider);

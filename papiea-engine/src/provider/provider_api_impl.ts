@@ -6,6 +6,7 @@ import { Validator } from "../validator";
 import { Authorizer } from "../auth/authz";
 import { UserAuthInfo } from "../auth/authn";
 import { createHash } from "../auth/crypto";
+import * as Async from "../utils/async";
 import { Action, Provider, S2S_Key, Secret, Status, Version, Metadata, Spec, IntentWatcher, EntityCreateOrUpdateResult, EntityStatusUpdateInput } from "papiea-core";
 import {Logger, RequestContext, spanOperation} from "papiea-backend-utils"
 import { Watchlist_DB } from "../databases/watchlist_db_interface";
@@ -57,7 +58,7 @@ export class Provider_API_Impl implements Provider_API {
                                    ctx.tracing_ctx)
         const providers = await this.providerDb.list_providers();
         span.finish()
-        return this.authorizer.filter(this.logger, user, providers, Action.ReadProvider);
+        return await Async.collect(this.authorizer.filter(this.logger, user, providers, Action.ReadProvider));
     };
 
     async unregister_provider(user: UserAuthInfo, provider_prefix: string, version: Version, ctx: RequestContext): Promise<void> {
@@ -158,7 +159,7 @@ export class Provider_API_Impl implements Provider_API {
                                    ctx.tracing_ctx)
         const res = await this.providerDb.find_providers(provider_prefix);
         span.finish()
-        return this.authorizer.filter(this.logger, user, res, Action.ReadProvider);
+        return await Async.collect(this.authorizer.filter(this.logger, user, res, Action.ReadProvider));
     }
 
     async update_auth(user: UserAuthInfo, provider_prefix: string, provider_version: Version, auth: any, ctx: RequestContext): Promise<void> {
@@ -188,7 +189,7 @@ export class Provider_API_Impl implements Provider_API {
         // it is not unique, different providers may have same owner
         // - provider_prefix determines provider key belongs to,
         // tuple (owner, provider_prefix) determines a set of keys owner owns for given provider
-        // - extension is a UserAuthInfo which will be used when s2s key provided, that is 
+        // - extension is a UserAuthInfo which will be used when s2s key provided, that is
         // if s2skey A is provided in Authoriation
         // then casbin will do all checks against A.extension.owner,
         // A.extension.provider_prefix, A.extension.tenant, etc.
@@ -248,6 +249,6 @@ export class Provider_API_Impl implements Provider_API {
             secret = s2s_key.key;
             s2s_key.key = secret.slice(0, 2) + "*****" + secret.slice(-2);
         }
-        return this.authorizer.filter(this.logger, user, res, Action.ReadS2SKey);
+        return await Async.collect(this.authorizer.filter(this.logger, user, res, Action.ReadS2SKey));
     }
 }
