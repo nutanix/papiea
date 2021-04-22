@@ -1,4 +1,4 @@
-import { Collection, Db } from "mongodb"
+import { Collection, Db, Cursor } from "mongodb"
 import { SortParams } from "../entity/entity_api_impl"
 import { Logger } from 'papiea-backend-utils'
 import { IntentWatcher_DB } from "./intent_watcher_db_interface"
@@ -56,7 +56,7 @@ export class IntentWatcher_DB_Mongo implements IntentWatcher_DB {
     }
 
 
-    list_watchers(fields_map: any, sortParams?: SortParams): AsyncIterable<IntentWatcher> {
+    list_watchers(fields_map: any, sortParams?: SortParams): Cursor<IntentWatcher> {
         const filter: any = Object.assign({}, fields_map);
         if (sortParams) {
             return this.collection.find(filter).sort(sortParams);

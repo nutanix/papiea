@@ -7,6 +7,7 @@ import {Watchlist} from "./watchlist"
 import {Diff, DiffContent, Differ, Entity, IntentfulStatus, IntentWatcher} from "papiea-core"
 import {timeout} from "../utils/utils"
 import {Logger} from "papiea-backend-utils"
+import { Cursor } from "mongodb"
 
 export class IntentResolver {
     private readonly specDb: Spec_DB
@@ -68,14 +69,15 @@ export class IntentResolver {
     }
 
     private async clearTerminalStateWatchers(watcherExpirySeconds: number) {
-        const watchers = this.intentWatcherDb.list_watchers({})
-        for await (let watcher of watchers) {
+        const watcher_cursor = this.intentWatcherDb.list_watchers({})
+        for await (let watcher of watcher_cursor) {
             if (IntentResolver.inTerminalState(watcher)) {
                 if (watcher.last_status_changed && (new Date().getTime() - watcher.last_status_changed.getTime()) / 1000 > watcherExpirySeconds) {
                     await this.intentWatcherDb.delete_watcher(watcher.uuid)
                 }
             }
         }
+        await watcher_cursor.close()
     }
 
     private async rediff(entity: Entity): Promise<Diff[]> {
@@ -137,8 +139,9 @@ export class IntentResolver {
     }
 
     private async onChange(entity: Entity) {
+        let watcher_cursor: Cursor<IntentWatcher>
         try {
-            const watchers = this.intentWatcherDb.list_watchers(
+            watcher_cursor = this.intentWatcherDb.list_watchers(
                 {
                     entity_ref: {
                         uuid: entity.metadata.uuid,
@@ -149,10 +152,12 @@ export class IntentResolver {
                     status: IntentfulStatus.Active
                 }
             )
-            for await (const watcher of watchers) {
+            for await (const watcher of watcher_cursor) {
                 await this.processActiveWatcher(watcher, entity)
             }
+            await watcher_cursor.close()
         } catch (e) {
+            await watcher_cursor!.close()
             this.logger.debug(`Couldn't process onChange for entity`, {
                 error: e.toString(),
                 stack: e.stack,
@@ -168,7 +173,7 @@ export class IntentResolver {
                 continue
             }
             const [entry_ref, _] = entries[key]
-            const watchers = this.intentWatcherDb.list_watchers(
+            const watcher_cursor = this.intentWatcherDb.list_watchers(
                 {
                     entity_ref: {
                         uuid: entry_ref.entity_reference.uuid,
@@ -179,7 +184,8 @@ export class IntentResolver {
                     status: IntentfulStatus.Active
                 }
             )
-            const hasWatcher = ! (await watchers[Symbol.asyncIterator]().next()).done;
+            const hasWatcher = ! (await watcher_cursor[Symbol.asyncIterator]().next()).done;
+            await watcher_cursor.close()
             if (hasWatcher) {
                 try {
                     const [, spec] = await this.specDb.get_spec({...entry_ref.provider_reference, ...entry_ref.entity_reference})

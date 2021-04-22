@@ -73,8 +73,9 @@ export class Entity_API_Impl implements Entity_API {
     }
 
     filter_intent_watcher(user: UserAuthInfo, fields: any, ctx: RequestContext, sortParams?: SortParams): AsyncIterable<Partial<IntentWatcher>> {
-        const intent_watchers = this.intent_watcher_db.list_watchers(fields, sortParams)
-        const filteredRes = this.intentWatcherAuthorizer.filter(this.logger, user, intent_watchers, Action.Read);
+        const watcher_cursor = this.intent_watcher_db.list_watchers(fields, sortParams)
+        const filteredRes = this.intentWatcherAuthorizer.filter(this.logger, user, watcher_cursor, Action.Read);
+        watcher_cursor.close()
         return IntentWatcherMapper.toResponses(filteredRes)
     }
 
