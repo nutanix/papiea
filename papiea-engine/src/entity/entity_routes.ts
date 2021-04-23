@@ -80,8 +80,9 @@ export function createEntityAPIRouter(entity_api: Entity_API, trace: Function): 
         if (req.query.status) {
             filter.status = req.query.status
         }
-        const intent_watchers = await Async.collect(
-            entity_api.filter_intent_watcher(req.user, filter, res.locals.ctx, sortParams))
+        const [watcher_iter, watcher_cursor] = entity_api.filter_intent_watcher(req.user, filter, res.locals.ctx, sortParams)
+        const intent_watchers = await Async.collect(watcher_iter)
+        await watcher_cursor.close()
         res.json(paginateEntities(intent_watchers, skip, size))
     }))
 
@@ -104,8 +105,9 @@ export function createEntityAPIRouter(entity_api: Entity_API, trace: Function): 
         if (req.body.status) {
             filter.status = req.body.status
         }
-        const intent_watchers = await Async.collect(
-            entity_api.filter_intent_watcher(req.user, filter, res.locals.ctx, sortParams))
+        const [watcher_iter, watcher_cursor] = entity_api.filter_intent_watcher(req.user, filter, res.locals.ctx, sortParams)
+        const intent_watchers = await Async.collect(watcher_iter)
+        await watcher_cursor.close()
         res.json(paginateEntities(intent_watchers, skip, size))
     }))
 

@@ -2,6 +2,7 @@ import { UserAuthInfo } from "../auth/authn";
 import { Version, Spec, Metadata, uuid4, Status, Entity_Reference, Action, Entity, EntityCreateOrUpdateResult, IntentWatcher } from "papiea-core";
 import { SortParams } from "./entity_api_impl";
 import {RequestContext} from "papiea-backend-utils"
+import { Cursor } from "mongodb";
 
 export interface Entity_API {
     save_entity(user: UserAuthInfo, prefix: string, kind_name: string, version: Version, input: unknown, context: RequestContext): Promise<EntityCreateOrUpdateResult>
@@ -12,7 +13,7 @@ export interface Entity_API {
 
     get_entity_status(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, context: RequestContext): Promise<[Metadata, Status]>
 
-    filter_intent_watcher(user: UserAuthInfo, fields: any, context: RequestContext, sortParams?: SortParams): AsyncIterable<Partial<IntentWatcher>>
+    filter_intent_watcher(user: UserAuthInfo, fields: any, context: RequestContext, sortParams?: SortParams): [AsyncIterable<Partial<IntentWatcher>>, Cursor<IntentWatcher>]
 
     filter_entity_spec(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): AsyncIterable<[Metadata, Spec]>
 

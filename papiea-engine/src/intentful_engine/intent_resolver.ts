@@ -44,9 +44,11 @@ export class IntentResolver {
         for (let diff of current_diffs) {
             for (let idx in watcher_diff.diff_fields) {
                 const watcher_diff_path = JSON.stringify(watcher_diff.diff_fields[idx].path)
-                const current_diff_path = JSON.stringify(diff.diff_fields[idx].path)
-                if (watcher_diff_path === current_diff_path) {
-                    return diff
+                for (let current_diff_idx in diff.diff_fields) {
+                    const current_diff_path = JSON.stringify(diff.diff_fields[current_diff_idx].path)
+                    if (watcher_diff_path === current_diff_path) {
+                        return diff
+                    }
                 }
             }
         }

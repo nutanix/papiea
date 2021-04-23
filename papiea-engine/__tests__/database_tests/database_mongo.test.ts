@@ -574,8 +574,10 @@ describe("MongoDb tests", () => {
             entity_ref: {} as Provider_Entity_Reference,
         };
         await watcherDb.save_watcher(watcher);
-        const res = (await watcherDb.list_watchers({ uuid: watcher.uuid }) as IntentWatcher[])[0]
-        expect(res.uuid).toEqual(watcher.uuid);
+        const watcher_cursor = watcherDb.list_watchers({ uuid: watcher.uuid })
+        const res = await watcher_cursor.next()
+        expect(res!.uuid).toEqual(watcher.uuid);
+        await watcher_cursor.close()
         await watcherDb.delete_watcher(watcher.uuid)
     });
 
