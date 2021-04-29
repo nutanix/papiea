@@ -1,3 +1,4 @@
+- Version 0.9.59+2257: Race condition fixes in master (#687) PR url: git@github.com:nutanix/papiea.git/pull/687
 - Version 0.9.58+2247: Fix OOM issue && Use AsyncIterators to fetch intent watchers [#683] PR url: git@github.com:nutanix/papiea.git/pull/683
 - Version 0.9.57+2229: Merge pull request #682 from nutanix/josh/larger-request-sizes PR url: git@github.com:nutanix/papiea.git/pull/682
 - Version 0.9.56+2222: Modified logic and design for update status operation (#677) PR url: git@github.com:nutanix/papiea.git/pull/677
