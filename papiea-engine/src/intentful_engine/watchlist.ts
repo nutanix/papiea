@@ -1,4 +1,4 @@
-import { Diff, Entity_Reference, Version, Metadata } from "papiea-core"
+import { Diff, Entity_Reference, Version, Provider_Entity_Reference } from "papiea-core"
 
 // I don't like the provider being necessary here too much, maybe rethink this
 // TODO: this structure could be simplified because provider ref is in metadata now
@@ -26,7 +26,7 @@ export interface Backoff {
     retries: number
 }
 
-export function create_entry(metadata: Metadata): EntryReference {
+export function create_entry(metadata: Provider_Entity_Reference): EntryReference {
     return {
         provider_reference: {
             provider_prefix: metadata.provider_prefix,
@@ -41,7 +41,7 @@ export function create_entry(metadata: Metadata): EntryReference {
 
 export type SerializedWatchlist = {[key: string]: Watch}
 export type WatchlistEntries = Watch[]
-type Watch = [EntryReference, [Diff, Backoff | null][]]
+export type Watch = [EntryReference, [Diff, Backoff | null][]]
 
 export class Watchlist {
     private _entries: SerializedWatchlist

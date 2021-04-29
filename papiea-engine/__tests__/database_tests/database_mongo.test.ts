@@ -616,13 +616,15 @@ describe("MongoDb tests", () => {
                 kind: "test_kind"
             }
         }
-        watchlist.set([entry_ref, [[{} as Diff, {delay: {delay_seconds: 120, delay_set_time: new Date()}, retries: 0}]]])
-        await watchlistDb.update_watchlist(watchlist)
-        const watchlistUpdated = await watchlistDb.get_watchlist()
+        await watchlistDb.edit_watchlist(async watchlist => {
+            watchlist.set([entry_ref, [[{} as Diff, {delay: {delay_seconds: 120, delay_set_time: new Date()}, retries: 0}]]])
+            return watchlist
+        })
+        const watchlistUpdated = await watchlistDb.edit_watchlist(async w => w)
         // ![1]![0]![1] === [EntryReference, [Diff, Backoff | null][]], which is a Backoff.
         // It is not null because of the definition above
         expect(watchlistUpdated.get(entry_ref)![1]![0]![1]!.delay!.delay_seconds).toBe(120)
-        await watchlistDb.update_watchlist(new Watchlist())
+        await watchlistDb.edit_watchlist(async watchlist => watchlist.update(new Watchlist()))
     });
 
     const entity: Entity = {

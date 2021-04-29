@@ -88,12 +88,12 @@ export class DifferUpdateStrategy extends StatusUpdateStrategy {
         for (let diff of this.differ.diffs(this.kind!, spec, status)) {
             diffs.push(diff)
         }
-        const watchlist = await this.watchlistDb.get_watchlist()
-        const ent = create_entry(db_metadata)
-        if (!watchlist.has(ent)) {
-            watchlist.set([ent, []])
-            await this.watchlistDb.update_watchlist(watchlist)
-        }
+        await this.watchlistDb.edit_watchlist(async watchlist => {
+            const ent = create_entry(metadata)
+            if (!watchlist.has(ent)) {
+                watchlist.set([ent, []])
+            }
+        })
         const span = spanOperation(`update_status_db`,
                                    ctx.tracing_ctx)
         const res = await super.update(metadata, status, ctx)

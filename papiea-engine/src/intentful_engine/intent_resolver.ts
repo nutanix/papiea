@@ -3,9 +3,10 @@ import {Status_DB} from "../databases/status_db_interface"
 import {IntentWatcher_DB} from "../databases/intent_watcher_db_interface"
 import {Provider_DB} from "../databases/provider_db_interface"
 import {Handler, IntentfulListener} from "./intentful_listener_interface"
-import {Watchlist} from "./watchlist"
+import { Watchlist_DB } from "../databases/watchlist_db_interface";
 import {Diff, DiffContent, Differ, Entity, IntentfulStatus, IntentWatcher} from "papiea-core"
 import {timeout} from "../utils/utils"
+import * as Async from "../utils/async"
 import {Logger} from "papiea-backend-utils"
 import { Cursor } from "mongodb"
 
@@ -18,13 +19,13 @@ export class IntentResolver {
     private intentfulListener: IntentfulListener
     private differ: Differ
     private logger: Logger;
-    private watchlist: Watchlist;
+    private watchlistDb: Watchlist_DB;
     private static TERMINAL_STATES = [IntentfulStatus.Completed_Partially, IntentfulStatus.Completed_Successfully, IntentfulStatus.Outdated]
 
     constructor(specDb: Spec_DB, statusDb: Status_DB,
                 intentWatcherDb: IntentWatcher_DB, providerDb: Provider_DB,
                 intentfulListener: IntentfulListener, differ: Differ,
-                watchlist: Watchlist, logger: Logger)
+                watchlist: Watchlist_DB, logger: Logger)
     {
         this.specDb = specDb
         this.statusDb = statusDb
@@ -34,7 +35,7 @@ export class IntentResolver {
 
         this.onChange = this.onChange.bind(this)
 
-        this.watchlist = watchlist
+        this.watchlistDb = watchlist
         this.differ = differ
         this.intentfulListener = intentfulListener
         this.intentfulListener.onChange = new Handler(this.onChange)
@@ -99,6 +100,7 @@ export class IntentResolver {
             // All the spec fields recorded by the watcher got changed as a series of spec changes
             // but none of the diffs (on the watcher fields) got resolved, only affected, thus Outdated
             let affected_diff_count = 0
+            // this.logger.debug(`processActiveWatcher`, {current_diffs, active})
             for (let watcher_diff of active.diffs) {
                 // Current set of diff fields are more up to date, thus replacing
                 const existing_diff = IntentResolver.getExisting(current_diffs, watcher_diff)
@@ -161,15 +163,22 @@ export class IntentResolver {
         } catch (e) {
             await watcher_cursor!.close()
             this.logger.debug(`Couldn't process onChange for entity`, {
+                entity: {
+                    uuid: entity.metadata.uuid,
+                    kind: entity.metadata.kind,
+                    provider: entity.metadata.provider_prefix,
+                    provider_version: entity.metadata.provider_version,
+                },
                 error: e.toString(),
                 stack: e.stack,
-                entity,
+                watchers: await Async.collect(watcher_cursor!)
             });
         }
     }
 
     private async updateActiveWatchersStatuses() {
-        let entries = this.watchlist.entries();
+        let entries = await this.watchlistDb.edit_watchlist(
+            async watchlist => watchlist.entries());
         for (let key in entries) {
             if (!entries.hasOwnProperty(key)) {
                 continue

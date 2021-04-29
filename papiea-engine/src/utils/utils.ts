@@ -154,18 +154,11 @@ export function getCalculateBackoffFn(retryExponent: number, logger: Logger) {
 }
 
 export function getEntropyFn(papieaDebug: boolean) {
-    let min: number
-    let max: number
-    if (papieaDebug) {
-        min = 1
-        max = 2
-    } else {
-        min = 10
-        max = 20
-    }
+    let min: number = 0
+    let max: number = 5
     return (diff_delay?: number) => {
         if (diff_delay !== undefined && diff_delay !== null) {
-            return diff_delay + getRandomInt(1, 10)
+            return diff_delay + getRandomInt(min, max)
         }
         return getRandomInt(min, max)
     }

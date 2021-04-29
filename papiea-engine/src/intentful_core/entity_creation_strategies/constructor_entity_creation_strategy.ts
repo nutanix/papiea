@@ -86,12 +86,12 @@ export class ConstructorEntityCreationStrategy extends EntityCreationStrategy {
                 watcher.diffs.push(diff)
             }
             await this.intentWatcherDb.save_watcher(watcher)
-            const watchlist = await this.watchlistDb.get_watchlist()
-            const ent = create_entry(created_metadata)
-            if (!watchlist.has(ent)) {
-                watchlist.set([ent, []])
-                await this.watchlistDb.update_watchlist(watchlist)
-            }
+            await this.watchlistDb.edit_watchlist(async watchlist => {
+                const ent = create_entry(created_metadata)
+                if (!watchlist.has(ent)) {
+                    watchlist.set([ent, []])
+                }
+            });
         }
         return {
             intent_watcher: watcher,
