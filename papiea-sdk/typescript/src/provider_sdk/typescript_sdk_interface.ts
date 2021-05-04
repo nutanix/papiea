@@ -75,8 +75,8 @@ export interface SecurityApi {
 
 // [[file:~/work/papiea-js/Papiea-design.org::#h-Providers-SDK-518][provider_sdk_ts_intentful_ctx_interface]]
 export interface IntentfulCtx_Interface {
-    update_status(entity_reference: Entity_Reference, status: Status):Promise<boolean>
-    replace_status(entity_reference: Entity_Reference, status: Status):Promise<boolean>
+    update_status(entity_reference: Entity_Reference, status: Status):Promise<any>
+    replace_status(entity_reference: Entity_Reference, status: Status):Promise<any>
     update_progress(message:string, done_percent:number):boolean
     url_for(entity: Entity): string
     get_provider_security_api(): SecurityApi
