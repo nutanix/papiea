@@ -85,16 +85,16 @@ export class Entity_API_Impl implements Entity_API {
         return await strategy.create(input, ctx)
     }
 
-    async get_entity_spec(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, ctx: RequestContext,): Promise<[Metadata, Spec]> {
+    async get_entity(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, ctx: RequestContext,): Promise<[Metadata, Spec, Status]> {
         const provider = await this.get_provider(prefix, version, ctx);
         const entity_ref: Provider_Entity_Reference = { kind: kind_name, uuid: entity_uuid, provider_prefix: prefix, provider_version: version };
         const span = spanOperation(`get_spec_db`,
                                    ctx.tracing_ctx,
                                    {entity_uuid})
-        const [metadata, spec] = await this.spec_db.get_spec(entity_ref);
+        const [metadata, spec, status] = await this.spec_db.get_spec_status(entity_ref);
         span.finish()
         await this.authorizer.checkPermission(user, {"metadata": metadata}, Action.Read, provider);
-        return [metadata, spec];
+        return [metadata, spec, status];
     }
 
     async get_entity_status(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, ctx: RequestContext,): Promise<[Metadata, Status]> {
@@ -164,8 +164,7 @@ export class Entity_API_Impl implements Entity_API {
         const provider = await this.get_provider(prefix, version, ctx);
         const kind = this.providerDb.find_kind(provider, kind_name);
         const entity_ref: Provider_Entity_Reference = { kind: kind_name, uuid: entity_uuid, provider_prefix: prefix, provider_version: version };
-        const [metadata, spec] = await this.spec_db.get_spec(entity_ref);
-        const [_, status] = await this.status_db.get_status(entity_ref);
+        const [metadata, spec, status] = await this.spec_db.get_spec_status(entity_ref);
         await this.authorizer.checkPermission(user, {"metadata": metadata}, Action.Delete, provider);
         const strategy = this.intentfulCtx.getIntentfulStrategy(provider, kind, user)
         await strategy.delete({ metadata, spec, status }, ctx)
@@ -174,9 +173,7 @@ export class Entity_API_Impl implements Entity_API {
     async call_procedure(user: UserAuthInfo, prefix: string, kind_name: string, version: Version, entity_uuid: uuid4, procedure_name: string, input: any, ctx: RequestContext): Promise<any> {
         const provider = await this.get_provider(prefix, version, ctx);
         const kind = this.providerDb.find_kind(provider, kind_name);
-        const entity_spec: [Metadata, Spec] = await this.get_entity_spec(user, prefix, version, kind_name, entity_uuid, ctx);
-        const entity_status: [Metadata, Status] = await this.get_entity_status(
-            user, prefix, version, kind_name, entity_uuid, ctx);
+        const entity: [Metadata, Spec, Status] = await this.get_entity(user, prefix, version, kind_name, entity_uuid, ctx);
         const procedure: Procedural_Signature | undefined = kind.entity_procedures[procedure_name];
         if (procedure === undefined) {
             throw new PapieaException({ message: `Entity procedure not found for kind: ${prefix}/${version}/${kind.name}. Make sure the procedure name is correct & procedure is registered.`, entity_info: { provider_prefix: prefix, provider_version: version, kind_name: kind.name, additional_info: { "procedure_name": procedure_name }}});
@@ -197,9 +194,9 @@ export class Entity_API_Impl implements Entity_API {
                                              {entity_uuid})
             const { data } = await axios.post(procedure.procedure_callback,
                 {
-                    metadata: entity_spec[0],
-                    spec: entity_spec[1],
-                    status: entity_status[1],
+                    metadata: entity[0],
+                    spec: entity[1],
+                    status: entity[2],
                     input: input
                 }, {
                     headers: {...getTraceHeaders(ctx.tracing_ctx.headers), ...user}

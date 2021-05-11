@@ -20,12 +20,10 @@ export class IntentfulListenerMongo implements IntentfulListener {
         const entries = await this.watchlistDb.edit_watchlist(
             async watchlist => watchlist.entries());
         const uuids = Object.values(entries).map(ent => ent[0].entity_reference.uuid)
-        const metadata_specs = await this.specDb.list_specs_in(uuids)
-        const metadata_statuses = await this.statusDb.list_status_in(uuids)
-        for (let i in metadata_specs) {
+        const metadata_entities = await this.specDb.list_specs_statuses_in(uuids)
+        for (let i in metadata_entities) {
             // These are guaranteed to be in order because they are sorted by uuids
-            const [metadata, spec] = metadata_specs[i]
-            const [, status] = metadata_statuses[i]
+            const [metadata, spec, status] = metadata_entities[i]
             const entry = this.entities.get(metadata.uuid)
             if (!entry) {
                 this.entities.set(metadata.uuid, [spec, status])

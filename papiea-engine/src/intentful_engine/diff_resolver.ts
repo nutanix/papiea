@@ -100,8 +100,7 @@ export class DiffResolver {
 
     private async rediff(entry_reference: EntryReference): Promise<RediffResult | null> {
         try {
-            const [, spec] = await this.specDb.get_spec({...entry_reference.provider_reference, ...entry_reference.entity_reference})
-            const [metadata, status] = await this.statusDb.get_status({...entry_reference.provider_reference, ...entry_reference.entity_reference})
+            const [metadata, spec, status] = await this.specDb.get_spec_status({...entry_reference.provider_reference, ...entry_reference.entity_reference})
             const provider = await this.providerDb.get_provider(entry_reference.provider_reference.provider_prefix, entry_reference.provider_reference.provider_version)
             const kind = this.providerDb.find_kind(provider, metadata.kind)
 

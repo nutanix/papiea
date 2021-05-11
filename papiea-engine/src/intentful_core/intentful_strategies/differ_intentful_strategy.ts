@@ -23,8 +23,8 @@ export class DifferIntentfulStrategy extends IntentfulStrategy {
     }
 
     async update_entity(metadata: Metadata, spec: Spec): Promise<[Metadata, Spec, Status]> {
-        const [, updatedSpec] = await this.specDb.update_spec(metadata, spec);
-        const [updatedMetadata, updatedStatus] = await this.statusDb.get_status(metadata)
+        await this.specDb.update_spec(metadata, spec);
+        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(metadata)
         return [updatedMetadata, updatedSpec, updatedStatus]
     }
 

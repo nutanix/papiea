@@ -12,8 +12,9 @@ export class SpecOnlyIntentfulStrategy extends IntentfulStrategy {
 
     // Replace spec and status with spec changes received
     async update_entity(metadata: Metadata, spec: Spec): Promise<[Metadata, Spec, Status]> {
-        const [, updatedSpec] = await this.specDb.update_spec(metadata, spec);
-        const [updatedMetadata, updatedStatus] = await this.statusDb.replace_status(metadata, spec)
+        await this.specDb.update_spec(metadata, spec);
+        await this.statusDb.replace_status(metadata, spec)
+        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(metadata)
         return [updatedMetadata, updatedSpec, updatedStatus]
     }
 

@@ -42,8 +42,9 @@ export class ConstructorEntityCreationStrategy extends EntityCreationStrategy {
     protected async save_entity(entity: Entity): Promise<[Metadata, Spec, Status]> {
         // Create increments spec version so we should check already incremented one
         await this.check_spec_version(entity.metadata, entity.metadata.spec_version + 1, entity.spec)
-        const [_, updatedSpec] = await this.specDb.update_spec(entity.metadata, entity.spec)
-        const[updatedMetadata, updatedStatus] = await this.statusDb.replace_status(entity.metadata, entity.status)
+        await this.specDb.update_spec(entity.metadata, entity.spec)
+        await this.statusDb.replace_status(entity.metadata, entity.status)
+        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(entity.metadata)
         return [updatedMetadata, updatedSpec, updatedStatus]
     }
 

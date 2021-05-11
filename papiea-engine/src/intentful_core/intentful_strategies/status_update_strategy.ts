@@ -19,8 +19,8 @@ export abstract class StatusUpdateStrategy {
     }
 
     async update(metadata: EntityStatusUpdateInput, status: Status, ctx: RequestContext): Promise<EntityCreateOrUpdateResult> {
-        const [, updatedStatus] = await this.statusDb.update_status(metadata, status);
-        const [updatedMetadata, updatedSpec] = await this.specDb.get_spec(metadata)
+        await this.statusDb.update_status(metadata, status);
+        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(metadata)
         return {
             intent_watcher: null,
             metadata: updatedMetadata,
@@ -30,8 +30,8 @@ export abstract class StatusUpdateStrategy {
     }
 
     async replace(metadata: EntityStatusUpdateInput, status: Status, ctx: RequestContext): Promise<EntityCreateOrUpdateResult> {
-        const [, updatedStatus] = await this.statusDb.replace_status(metadata, status);
-        const [updatedMetadata, updatedSpec] = await this.specDb.get_spec(metadata)
+        await this.statusDb.replace_status(metadata, status);
+        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(metadata)
         return {
             intent_watcher: null,
             metadata: updatedMetadata,

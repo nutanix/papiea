@@ -7,7 +7,7 @@ import { Cursor } from "mongodb";
 export interface Entity_API {
     save_entity(user: UserAuthInfo, prefix: string, kind_name: string, version: Version, input: unknown, context: RequestContext): Promise<EntityCreateOrUpdateResult>
 
-    get_entity_spec(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, context: RequestContext): Promise<[Metadata, Spec]>
+    get_entity(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, context: RequestContext): Promise<[Metadata, Spec, Status]>
 
     get_intent_watcher(user: UserAuthInfo, id: string, context: RequestContext): Promise<Partial<IntentWatcher>>
 

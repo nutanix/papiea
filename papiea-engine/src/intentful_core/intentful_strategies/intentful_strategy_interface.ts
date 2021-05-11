@@ -35,8 +35,9 @@ export abstract class IntentfulStrategy {
 
     async update_entity(metadata: Metadata, spec: Spec): Promise<[Metadata, Spec, Status]> {
         await this.check_spec_version(metadata, metadata.spec_version, spec)
-        const [, updatedSpec] = await this.specDb.update_spec(metadata, spec);
-        const [updatedMetadata, updatedStatus] = await this.statusDb.update_status(metadata, spec)
+        await this.specDb.update_spec(metadata, spec);
+        await this.statusDb.update_status(metadata, spec)
+        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(metadata)
         return [updatedMetadata, updatedSpec, updatedStatus]
     }
 

@@ -53,10 +53,9 @@ export abstract class EntityCreationStrategy {
 
     protected async get_existing_entities(provider: Provider, uuid: string, kind_name: string): Promise<[Metadata, Spec, Status] | []> {
         try {
-            const result_spec = await this.specDb.list_specs({ metadata: { uuid: uuid, kind: kind_name, provider_version: provider.version, provider_prefix: provider.prefix, deleted_at: null } }, false)
-            const result_status = await this.statusDb.list_status({ metadata: { uuid: uuid, kind: kind_name, provider_version: provider.version, provider_prefix: provider.prefix, deleted_at: null } }, false)
-            if (result_spec.length !== 0 || result_status.length !== 0) {
-                return [result_spec[0][0], result_spec[0][1], result_status[0][1]]
+            const result = await this.specDb.list_specs_statuses({ metadata: { uuid: uuid, kind: kind_name, provider_version: provider.version, provider_prefix: provider.prefix, deleted_at: null } }, false)
+            if (result.length !== 0) {
+                return [result[0][0], result[0][1], result[0][2]]
             } else {
                 return []
             }
@@ -117,8 +116,9 @@ export abstract class EntityCreationStrategy {
     protected async create_entity(metadata: Metadata, spec: Spec): Promise<[Metadata, Spec]> {
         // Create increments spec version so we should check already incremented one
         await this.check_spec_version(metadata, metadata.spec_version + 1, spec)
-        const [, updatedSpec] = await this.specDb.update_spec(metadata, spec);
-        const [updatedMetadata, ] = await this.statusDb.replace_status(metadata, spec)
+        await this.specDb.update_spec(metadata, spec);
+        await this.statusDb.replace_status(metadata, spec)
+        const [updatedMetadata, updatedSpec] = await this.specDb.get_spec(metadata)
         return [updatedMetadata, updatedSpec]
     }
 

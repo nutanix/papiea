@@ -1,7 +1,7 @@
 import { Spec_DB } from "./spec_db_interface";
 import { Collection, Db } from "mongodb";
 import { SpecConflictingEntityError, EntityNotFoundError } from "./utils/errors";
-import {Entity_Reference, Metadata, Spec, Entity, Provider_Entity_Reference} from "papiea-core"
+import {Entity_Reference, Metadata, Spec, Entity, Provider_Entity_Reference, Status} from "papiea-core"
 import { SortParams } from "../entity/entity_api_impl";
 import { Logger, dotnotation } from "papiea-backend-utils";
 import { IntentfulKindReference } from "./provider_db_mongo";
@@ -106,6 +106,21 @@ export class Spec_DB_Mongo implements Spec_DB {
         });
     }
 
+    async get_spec_status(entity_ref: Provider_Entity_Reference): Promise<[Metadata, Spec, Status]> {
+        const result: Entity | null = await this.collection.findOne(
+            {
+                "metadata.uuid": entity_ref.uuid,
+                "metadata.kind": entity_ref.kind,
+                "metadata.provider_prefix": entity_ref.provider_prefix,
+                "metadata.provider_version": entity_ref.provider_version,
+                "metadata.deleted_at": null
+            });
+        if (result === null) {
+            throw new EntityNotFoundError(entity_ref.kind, entity_ref.uuid, entity_ref.provider_prefix, entity_ref.provider_version)
+        }
+        return [result.metadata, result.spec, result.status];
+    }
+
     async list_specs(fields_map: any, exact_match: boolean, sortParams?: SortParams): Promise<([Metadata, Spec])[]> {
         const filter = build_filter_query(fields_map, exact_match)
         let result: any[];
@@ -123,11 +138,28 @@ export class Spec_DB_Mongo implements Spec_DB {
         });
     }
 
-    async list_specs_in(filter_list: any[], field_name: string = "metadata.uuid"): Promise<([Metadata, Spec])[]> {
-        const result = await this.collection.find({ [field_name]: { $in: filter_list } }).sort({ "metadata.uuid": 1 }).toArray();
-        return result.map((x: any): [Metadata, Spec] => {
+    async list_specs_statuses(fields_map: any, exact_match: boolean, sortParams?: SortParams): Promise<([Metadata, Spec, Status])[]> {
+        const filter = build_filter_query(fields_map, exact_match)
+        let result: any[];
+        if (sortParams) {
+            result = await this.collection.find(filter).sort(sortParams).toArray();
+        } else {
+            result = await this.collection.find(filter).toArray();
+        }
+        return result.map((x: any): [Metadata, Spec, Status] => {
             if (x.spec !== null) {
-                return [x.metadata, x.spec]
+                return [x.metadata, x.spec, x.status]
+            } else {
+                throw new PapieaException({ message: "MongoDBError: No valid entities found for list specs." });
+            }
+        });
+    }
+
+    async list_specs_statuses_in(filter_list: any[], field_name: string = "metadata.uuid"): Promise<([Metadata, Spec, Status])[]> {
+        const result = await this.collection.find({ [field_name]: { $in: filter_list } }).sort({ "metadata.uuid": 1 }).toArray();
+        return result.map((x: any): [Metadata, Spec, Status] => {
+            if (x.spec !== null) {
+                return [x.metadata, x.spec, x.status]
             } else {
                 throw new PapieaException({ message: "MongoDBError: No valid entities found for list specs." });
             }

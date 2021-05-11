@@ -1,4 +1,4 @@
-import {Metadata, Spec, Entity_Reference, Provider_Entity_Reference} from "papiea-core"
+import {Metadata, Spec, Entity_Reference, Provider_Entity_Reference, Status} from "papiea-core"
 import { SortParams } from "../entity/entity_api_impl";
 import { IntentfulKindReference } from "./provider_db_mongo";
 
@@ -21,6 +21,10 @@ export interface Spec_DB {
     // current metadata and the spec of that entity.
     get_spec(entity_ref: Provider_Entity_Reference): Promise<[Metadata, Spec]>;
 
+    // Get the spec and status of a particular entity from the db. Returns the
+    // current metadata, spec and status of that entity.
+    get_spec_status(entity_ref: Provider_Entity_Reference): Promise<[Metadata, Spec, Status]>;
+
     // Get specs by their entity references
     get_specs_by_ref(entity_refs: Entity_Reference[]): Promise<[Metadata, Spec][]>
 
@@ -35,7 +39,9 @@ export interface Spec_DB {
     // dsl.
     list_specs(fields_map: any, exact_match: boolean, sortParams?: SortParams): Promise<([Metadata, Spec])[]>;
 
-    list_specs_in(filter_list: any[], field_name?: string): Promise<([Metadata, Spec])[]>
+    list_specs_statuses(fields_map: any, exact_match: boolean, sortParams?: SortParams): Promise<([Metadata, Spec, Status])[]>;
+
+    list_specs_statuses_in(filter_list: any[], field_name?: string): Promise<([Metadata, Spec, Status])[]>
 
     list_random_intentful_specs(size: number, kind_refs: IntentfulKindReference[], sortParams?: SortParams): Promise<([Metadata, Spec])[]>;
 }

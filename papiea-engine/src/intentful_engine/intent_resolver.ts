@@ -199,8 +199,7 @@ export class IntentResolver {
             await watcher_cursor.close()
             if (hasWatcher) {
                 try {
-                    const [, spec] = await this.specDb.get_spec({...entry_ref.provider_reference, ...entry_ref.entity_reference})
-                    const [metadata, status] = await this.statusDb.get_status({...entry_ref.provider_reference, ...entry_ref.entity_reference})
+                    const [metadata, spec, status] = await this.specDb.get_spec_status({...entry_ref.provider_reference, ...entry_ref.entity_reference})
                     await this.onChange({ metadata, spec, status })
                 } catch (e) {
                     this.logger.debug(`Failed to process onChange in update active watcher status for entity with uuid: ${entry_ref.entity_reference.uuid} and kind: ${entry_ref.entity_reference.kind} for provider with prefix: ${entry_ref.provider_reference.provider_prefix} and version: ${entry_ref.provider_reference.provider_version} due to error: ${e}`)
