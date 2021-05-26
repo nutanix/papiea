@@ -36,18 +36,12 @@ export function createEntityAPIRouter(entity_api: Entity_API, trace: Function): 
             return paginateEntities(entities, skip, size)
         }
 
-        const resultSpecs = entity_api.filter_entity_spec(
-            user, prefix, version, kind_name, filter, exactMatch, ctx, sortParams);
-        const resultStatuses = entity_api.filter_entity_status(
+        const resultEntities = entity_api.filter_entity(
             user, prefix, version, kind_name, filter, exactMatch, ctx, sortParams);
 
         const uuidToEntity = new Map<string, any>();
-        for await (const x of resultSpecs) {
-            uuidToEntity.set(x[0].uuid, {metadata: x[0], spec: x[1]});
-        }
-        for await (const x of resultStatuses) {
-            const e = uuidToEntity.get(x[0].uuid);
-            if (e) e.status = x[1];
+        for await (const x of resultEntities) {
+            uuidToEntity.set(x.metadata.uuid, x);
         }
 
         const entities = Array.from(uuidToEntity.values());
@@ -131,8 +125,8 @@ export function createEntityAPIRouter(entity_api: Entity_API, trace: Function): 
     }));
 
     router.get("/:prefix/:version/:kind/:uuid", CheckNoQueryParams, trace("get_entity"), asyncHandler(async (req, res) => {
-        const [metadata, spec, status] = await entity_api.get_entity(req.user, req.params.prefix, req.params.version, req.params.kind, req.params.uuid, res.locals.ctx);
-        res.json({ "metadata": metadata, "spec": spec, "status": status });
+        const entity = await entity_api.get_entity(req.user, req.params.prefix, req.params.version, req.params.kind, req.params.uuid, res.locals.ctx);
+        res.json(entity);
     }));
 
     router.post("/:prefix/:version/:kind/filter", check_request({

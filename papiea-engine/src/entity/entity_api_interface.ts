@@ -7,17 +7,13 @@ import { Cursor } from "mongodb";
 export interface Entity_API {
     save_entity(user: UserAuthInfo, prefix: string, kind_name: string, version: Version, input: unknown, context: RequestContext): Promise<EntityCreateOrUpdateResult>
 
-    get_entity(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, context: RequestContext): Promise<[Metadata, Spec, Status]>
+    get_entity(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, context: RequestContext): Promise<Entity>
 
     get_intent_watcher(user: UserAuthInfo, id: string, context: RequestContext): Promise<Partial<IntentWatcher>>
 
-    get_entity_status(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, entity_uuid: uuid4, context: RequestContext): Promise<[Metadata, Status]>
-
     filter_intent_watcher(user: UserAuthInfo, fields: any, context: RequestContext, sortParams?: SortParams): [AsyncIterable<Partial<IntentWatcher>>, Cursor<IntentWatcher>]
 
-    filter_entity_spec(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): AsyncIterable<[Metadata, Spec]>
-
-    filter_entity_status(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): AsyncIterable<[Metadata, Status]>
+    filter_entity(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): AsyncIterable<Entity>
 
     filter_deleted(user: UserAuthInfo, prefix: string, version: Version, kind_name: string, fields: any, exact_match: boolean, context: RequestContext, sortParams?: SortParams): AsyncIterable<Entity>
 

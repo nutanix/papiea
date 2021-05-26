@@ -1,5 +1,3 @@
-import {Spec_DB} from "../../databases/spec_db_interface"
-import {Status_DB} from "../../databases/status_db_interface"
 import {Graveyard_DB} from "../../databases/graveyard_db_interface"
 import {
     Action,
@@ -20,10 +18,10 @@ import {Authorizer} from "../../auth/authz"
 import {RequestContext} from "papiea-backend-utils"
 import { PapieaException } from "../../errors/papiea_exception"
 import { getObjectHash } from "../../utils/utils"
+import { Entity_DB } from "../../databases/entity_db_interface"
 
 export abstract class EntityCreationStrategy {
-    protected readonly specDb: Spec_DB
-    protected readonly statusDb: Status_DB
+    protected readonly entityDb: Entity_DB
     protected readonly graveyardDb: Graveyard_DB
     protected readonly watchlistDb: Watchlist_DB
     protected readonly validator: Validator
@@ -33,9 +31,8 @@ export abstract class EntityCreationStrategy {
     protected provider!: Provider
 
 
-    protected constructor(specDb: Spec_DB, statusDb: Status_DB, graveyardDb: Graveyard_DB, watchlistDb: Watchlist_DB, validator: Validator, authorizer: Authorizer) {
-        this.specDb = specDb
-        this.statusDb = statusDb
+    protected constructor(entityDb: Entity_DB, graveyardDb: Graveyard_DB, watchlistDb: Watchlist_DB, validator: Validator, authorizer: Authorizer) {
+        this.entityDb = entityDb
         this.graveyardDb = graveyardDb
         this.watchlistDb = watchlistDb
         this.validator = validator
@@ -51,13 +48,13 @@ export abstract class EntityCreationStrategy {
         }
     }
 
-    protected async get_existing_entities(provider: Provider, uuid: string, kind_name: string): Promise<[Metadata, Spec, Status] | []> {
+    protected async get_existing_entities(provider: Provider, uuid: string, kind_name: string): Promise<Entity | undefined> {
         try {
-            const result = await this.specDb.list_specs_statuses({ metadata: { uuid: uuid, kind: kind_name, provider_version: provider.version, provider_prefix: provider.prefix, deleted_at: null } }, false)
+            const result = await this.entityDb.list_entities({ metadata: { uuid: uuid, kind: kind_name, provider_version: provider.version, provider_prefix: provider.prefix, deleted_at: null } }, false)
             if (result.length !== 0) {
-                return [result[0][0], result[0][1], result[0][2]]
+                return result[0]
             } else {
-                return []
+                return undefined
             }
         } catch (e) {
             // Hiding details of the error for security reasons
@@ -78,8 +75,8 @@ export abstract class EntityCreationStrategy {
             }
         } else {
             const result = await this.get_existing_entities(this.provider, request_metadata.uuid, request_metadata.kind)
-            if (result.length !== 0) {
-                const [metadata, ,] = result
+            if (result !== undefined) {
+                const metadata = result.metadata
                 throw new SpecConflictingEntityError(`Entity with UUID ${metadata.uuid} of kind: ${metadata.provider_prefix}/${metadata.provider_version}/${metadata.kind} already exists.`, metadata)
             }
         }
@@ -113,13 +110,13 @@ export abstract class EntityCreationStrategy {
         await this.authorizer.checkPermission(this.user, {"metadata": entity.metadata}, Action.Create, this.provider);
     }
 
-    protected async create_entity(metadata: Metadata, spec: Spec): Promise<[Metadata, Spec]> {
+    protected async create_entity(metadata: Metadata, spec: Spec): Promise<Entity> {
         // Create increments spec version so we should check already incremented one
         await this.check_spec_version(metadata, metadata.spec_version + 1, spec)
-        await this.specDb.update_spec(metadata, spec);
-        await this.statusDb.replace_status(metadata, spec)
-        const [updatedMetadata, updatedSpec] = await this.specDb.get_spec(metadata)
-        return [updatedMetadata, updatedSpec]
+        await this.entityDb.update_spec(metadata, spec);
+        await this.entityDb.replace_status(metadata, spec)
+        const updatedEntity = await this.entityDb.get_entity(metadata)
+        return updatedEntity
     }
 
     abstract create(input: unknown, ctx: RequestContext): Promise<EntityCreateOrUpdateResult>

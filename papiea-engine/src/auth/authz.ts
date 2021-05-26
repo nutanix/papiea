@@ -1,11 +1,11 @@
 import {UserAuthInfo} from "./authn"
-import {Spec_DB} from "../databases/spec_db_interface"
 import {Provider_DB} from "../databases/provider_db_interface"
 import {Action, Provider, IntentWatcher, Entity, Provider_Entity_Reference} from "papiea-core"
 import {PermissionDeniedError, UnauthorizedError} from "../errors/permission_error"
 import {BadRequestError} from "../errors/bad_request_error"
 import {Logger} from "papiea-backend-utils"
 import * as Async from '../utils/async'
+import { Entity_DB } from "../databases/entity_db_interface"
 
 export abstract class Authorizer {
     constructor() {
@@ -49,15 +49,15 @@ export interface EntityAuthorizerFactory {
 
 export class IntentWatcherAuthorizer extends Authorizer {
     private perProviderAuthorizer: PerProviderAuthorizer;
-    private spec_db: Spec_DB;
+    private entity_db: Entity_DB;
     private provider_db: Provider_DB;
     private logger: Logger;
 
-    constructor(logger: Logger, perProviderAuthorizer: PerProviderAuthorizer, spec_db: Spec_DB, provider_db: Provider_DB) {
+    constructor(logger: Logger, perProviderAuthorizer: PerProviderAuthorizer, entity_db: Entity_DB, provider_db: Provider_DB) {
         super()
         this.logger = logger;
         this.perProviderAuthorizer = perProviderAuthorizer;
-        this.spec_db = spec_db;
+        this.entity_db = entity_db;
         this.provider_db = provider_db;
     }
 
@@ -77,7 +77,7 @@ export class IntentWatcherAuthorizer extends Authorizer {
         }
 
         const provider: Provider = await this.provider_db.get_provider(entity_ref.provider_prefix, entity_ref.provider_version);
-        const [entity_metadata, ] = await this.spec_db.get_spec(entity_ref);
+        const { metadata: entity_metadata } = await this.entity_db.get_entity(entity_ref);
         return await this.perProviderAuthorizer.checkPermission(user, entity_metadata, action, provider)
     }
 }

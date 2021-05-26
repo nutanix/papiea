@@ -1,42 +1,35 @@
 import { EntityCreateOrUpdateResult, Status, Kind, Differ, Diff, EntityStatusUpdateInput } from "papiea-core";
-import { Status_DB } from "../../databases/status_db_interface";
 import { UserAuthInfo } from "../../auth/authn";
-import { Spec_DB } from "../../databases/spec_db_interface";
 import { Watchlist_DB } from "../../databases/watchlist_db_interface";
 import { create_entry } from "../../intentful_engine/watchlist";
 import {RequestContext, spanOperation} from "papiea-backend-utils"
 import { PapieaException } from "../../errors/papiea_exception"
+import { Entity_DB } from "../../databases/entity_db_interface";
 
 export abstract class StatusUpdateStrategy {
-    statusDb: Status_DB
-    specDb: Spec_DB
+    entityDb: Entity_DB
     kind?: Kind
     user?: UserAuthInfo
 
-    protected constructor(statusDb: Status_DB, specDb: Spec_DB) {
-        this.statusDb = statusDb
-        this.specDb = specDb
+    protected constructor(entityDb: Entity_DB) {
+        this.entityDb = entityDb
     }
 
     async update(metadata: EntityStatusUpdateInput, status: Status, ctx: RequestContext): Promise<EntityCreateOrUpdateResult> {
-        await this.statusDb.update_status(metadata, status);
-        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(metadata)
+        await this.entityDb.update_status(metadata, status);
+        const updatedEntity = await this.entityDb.get_entity(metadata)
         return {
             intent_watcher: null,
-            metadata: updatedMetadata,
-            spec: updatedSpec,
-            status: updatedStatus
+            ...updatedEntity
         }
     }
 
     async replace(metadata: EntityStatusUpdateInput, status: Status, ctx: RequestContext): Promise<EntityCreateOrUpdateResult> {
-        await this.statusDb.replace_status(metadata, status);
-        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(metadata)
+        await this.entityDb.replace_status(metadata, status);
+        const updatedEntity = await this.entityDb.get_entity(metadata)
         return {
             intent_watcher: null,
-            metadata: updatedMetadata,
-            spec: updatedSpec,
-            status: updatedStatus
+            ...updatedEntity
         }
     }
 
@@ -50,8 +43,8 @@ export abstract class StatusUpdateStrategy {
 }
 
 export class SpecOnlyUpdateStrategy extends StatusUpdateStrategy {
-    constructor(statusDb: Status_DB, specDb: Spec_DB) {
-        super(statusDb, specDb)
+    constructor(entityDb: Entity_DB) {
+        super(entityDb)
     }
 
     async update(metadata: EntityStatusUpdateInput, status: Status): Promise<any> {
@@ -64,8 +57,8 @@ export class SpecOnlyUpdateStrategy extends StatusUpdateStrategy {
 }
 
 export class BasicUpdateStrategy extends StatusUpdateStrategy {
-    constructor(statusDb: Status_DB, specDb: Spec_DB) {
-        super(statusDb, specDb)
+    constructor(entityDb: Entity_DB) {
+        super(entityDb)
     }
 }
 
@@ -73,17 +66,17 @@ export class DifferUpdateStrategy extends StatusUpdateStrategy {
     private readonly differ: Differ
     private readonly watchlistDb: Watchlist_DB
 
-    constructor(statusDb: Status_DB, specDb: Spec_DB, differ: Differ, watchlistDb: Watchlist_DB) {
-        super(statusDb, specDb)
+    constructor(entityDb: Entity_DB, differ: Differ, watchlistDb: Watchlist_DB) {
+        super(entityDb)
         this.differ = differ
         this.watchlistDb = watchlistDb
     }
 
     async update(metadata: EntityStatusUpdateInput, status: Status, ctx: RequestContext): Promise<EntityCreateOrUpdateResult> {
         let diffs: Diff[] = []
-        const getSpecSpan = spanOperation(`get_spec_db`,
+        const getSpecSpan = spanOperation(`get_entity_db`,
                                    ctx.tracing_ctx)
-        const [db_metadata, spec] = await this.specDb.get_spec(metadata)
+        const { spec } = await this.entityDb.get_entity(metadata)
         getSpecSpan.finish()
         for (let diff of this.differ.diffs(this.kind!, spec, status)) {
             diffs.push(diff)

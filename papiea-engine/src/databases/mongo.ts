@@ -1,8 +1,6 @@
 import axios from "axios";
 import { promisify } from "util"
 import { MongoClient, Db } from "mongodb";
-import { Spec_DB_Mongo } from "./spec_db_mongo";
-import { Status_DB_Mongo } from "./status_db_mongo";
 import { Provider_DB_Mongo } from "./provider_db_mongo";
 import { S2S_Key_DB_Mongo } from "./s2skey_db_mongo";
 import { SessionKeyDbMongo } from "./session_key_db_mongo"
@@ -12,6 +10,7 @@ import { Watchlist_Db_Mongo } from "./watchlist_db_mongo";
 import { Graveyard_DB } from "./graveyard_db_interface"
 import { Graveyard_DB_Mongo } from "./graveyard_db_mongo"
 import { PapieaException } from "../errors/papiea_exception";
+import { Entity_DB_Mongo } from "./entity_db_mongo";
 const fs = require('fs'),
     url = require('url');
 
@@ -22,9 +21,8 @@ export class MongoConnection {
     dbName: string;
     client: MongoClient;
     db: Db | undefined;
-    specDb: Spec_DB_Mongo | undefined;
+    entityDb: Entity_DB_Mongo | undefined;
     providerDb: Provider_DB_Mongo | undefined;
-    statusDb: Status_DB_Mongo | undefined;
     s2skeyDb: S2S_Key_DB_Mongo | undefined;
     sessionKeyDb: SessionKeyDbMongo | undefined
     intentWatcherDb: IntentWatcher_DB_Mongo | undefined
@@ -41,9 +39,8 @@ export class MongoConnection {
             autoReconnect: true
         });
         this.db = undefined;
-        this.specDb = undefined;
+        this.entityDb = undefined;
         this.providerDb = undefined;
-        this.statusDb = undefined;
         this.s2skeyDb = undefined;
         this.intentWatcherDb = undefined
         this.graveyardDb = undefined
@@ -81,14 +78,14 @@ export class MongoConnection {
         return this.client.close(true);
     }
 
-    async get_spec_db(logger: Logger): Promise<Spec_DB_Mongo> {
-        if (this.specDb !== undefined)
-            return this.specDb;
+    async get_entity_db(logger: Logger): Promise<Entity_DB_Mongo> {
+        if (this.entityDb !== undefined)
+            return this.entityDb;
         if (this.db === undefined)
-            throw new PapieaException({ message: "MongoDBError: Failed to connect to spec database." });
-        this.specDb = new Spec_DB_Mongo(logger, this.db);
-        await this.specDb.init();
-        return this.specDb;
+            throw new PapieaException({ message: "MongoDBError: Failed to connect to entity database." });
+        this.entityDb = new Entity_DB_Mongo(logger, this.db);
+        await this.entityDb.init();
+        return this.entityDb;
     }
 
     async get_provider_db(logger: Logger): Promise<Provider_DB_Mongo> {
@@ -99,16 +96,6 @@ export class MongoConnection {
         this.providerDb = new Provider_DB_Mongo(logger, this.db);
         await this.providerDb.init();
         return this.providerDb;
-    }
-
-    async get_status_db(logger: Logger): Promise<Status_DB_Mongo> {
-        if (this.statusDb !== undefined)
-            return this.statusDb;
-        if (this.db === undefined)
-            throw new PapieaException({ message: "MongoDBError: Failed to connect to status database." });
-        this.statusDb = new Status_DB_Mongo(logger, this.db);
-        await this.statusDb.init();
-        return this.statusDb;
     }
 
     async get_s2skey_db(logger: Logger): Promise<S2S_Key_DB_Mongo> {

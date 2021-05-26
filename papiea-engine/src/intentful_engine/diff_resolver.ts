@@ -1,7 +1,5 @@
 // [[file:~/work/papiea-js/Papiea-design.org::*/src/intentful_engine/task_manager_interface.ts][/src/intentful_engine/task_manager_interface.ts:1]]
 import { timeout } from "../utils/utils"
-import { Spec_DB } from "../databases/spec_db_interface"
-import { Status_DB } from "../databases/status_db_interface"
 import { create_entry, Backoff, EntryReference, Watchlist, Delay, Watch } from "./watchlist"
 import { Watchlist_DB } from "../databases/watchlist_db_interface";
 import { Differ, Diff, Metadata, Spec, Status, Kind, Provider } from "papiea-core";
@@ -10,6 +8,7 @@ import axios from "axios"
 import { IntentfulContext } from "../intentful_core/intentful_context";
 import { Logger } from "papiea-backend-utils";
 import deepEqual = require("deep-equal");
+import { Entity_DB } from "../databases/entity_db_interface";
 
 type DiffContext = {
     metadata: Metadata,
@@ -22,8 +21,7 @@ type RediffResult = {diffs: Diff[]} & DiffContext;
 type DiffWithContext = {diff: Diff} & DiffContext;
 
 export class DiffResolver {
-    protected readonly specDb: Spec_DB
-    protected readonly statusDb: Status_DB
+    protected readonly entityDb: Entity_DB
     private readonly watchlistDb: Watchlist_DB
     private readonly providerDb: Provider_DB
     private differ: Differ
@@ -34,9 +32,8 @@ export class DiffResolver {
     private entropyFn: (diff_delay?: number) => number
     private calculateBackoffFn: (retries?: number, maximumBackoff?: number, entropy?: number, kind_retry_exponent?: number, kind_name?: string) => number
 
-    constructor(watchlistDb: Watchlist_DB, specDb: Spec_DB, statusDb: Status_DB, providerDb: Provider_DB, differ: Differ, intentfulContext: IntentfulContext, logger: Logger, batchSize: number, entropyFn: (diff_delay?: number) => number, calculateBackoffFn: (retries?: number, maximumBackoff?: number, entropy?: number) => number) {
-        this.specDb = specDb
-        this.statusDb = statusDb
+    constructor(watchlistDb: Watchlist_DB, entityDb: Entity_DB, providerDb: Provider_DB, differ: Differ, intentfulContext: IntentfulContext, logger: Logger, batchSize: number, entropyFn: (diff_delay?: number) => number, calculateBackoffFn: (retries?: number, maximumBackoff?: number, entropy?: number) => number) {
+        this.entityDb = entityDb
         this.watchlistDb = watchlistDb
         this.providerDb = providerDb
         this.differ = differ
@@ -100,7 +97,7 @@ export class DiffResolver {
 
     private async rediff(entry_reference: EntryReference): Promise<RediffResult | null> {
         try {
-            const [metadata, spec, status] = await this.specDb.get_spec_status({...entry_reference.provider_reference, ...entry_reference.entity_reference})
+            const { metadata, spec, status } = await this.entityDb.get_entity({...entry_reference.provider_reference, ...entry_reference.entity_reference})
             const provider = await this.providerDb.get_provider(entry_reference.provider_reference.provider_prefix, entry_reference.provider_reference.provider_version)
             const kind = this.providerDb.find_kind(provider, metadata.kind)
 
@@ -329,10 +326,10 @@ export class DiffResolver {
     private async addRandomEntities() {
         const batch_size = await this.calculate_batch_size()
         const intentful_kind_refs = await this.providerDb.get_intentful_kinds()
-        const entities = await this.specDb.list_random_intentful_specs(batch_size, intentful_kind_refs)
+        const entities = await this.entityDb.list_random_intentful_specs(batch_size, intentful_kind_refs)
 
         return this.watchlistDb.edit_watchlist(async watchlist => {
-            for (let [metadata, _] of entities) {
+            for (let { metadata } of entities) {
                 const ent = create_entry(metadata)
                 if (! watchlist.has(ent)) {
                     watchlist.set([ent, []])

@@ -1,5 +1,3 @@
-import {Spec_DB} from "../databases/spec_db_interface"
-import {Status_DB} from "../databases/status_db_interface"
 import {IntentWatcher_DB} from "../databases/intent_watcher_db_interface"
 import {Provider_DB} from "../databases/provider_db_interface"
 import {Handler, IntentfulListener} from "./intentful_listener_interface"
@@ -9,10 +7,10 @@ import {timeout} from "../utils/utils"
 import * as Async from "../utils/async"
 import {Logger} from "papiea-backend-utils"
 import { Cursor } from "mongodb"
+import { Entity_DB } from "../databases/entity_db_interface"
 
 export class IntentResolver {
-    private readonly specDb: Spec_DB
-    private readonly statusDb: Status_DB
+    private readonly entityDb: Entity_DB
     private readonly intentWatcherDb: IntentWatcher_DB
     private readonly providerDb: Provider_DB
 
@@ -22,13 +20,12 @@ export class IntentResolver {
     private watchlistDb: Watchlist_DB;
     private static TERMINAL_STATES = [IntentfulStatus.Completed_Partially, IntentfulStatus.Completed_Successfully, IntentfulStatus.Outdated]
 
-    constructor(specDb: Spec_DB, statusDb: Status_DB,
+    constructor(entityDb: Entity_DB,
                 intentWatcherDb: IntentWatcher_DB, providerDb: Provider_DB,
                 intentfulListener: IntentfulListener, differ: Differ,
                 watchlist: Watchlist_DB, logger: Logger)
     {
-        this.specDb = specDb
-        this.statusDb = statusDb
+        this.entityDb = entityDb
         this.providerDb = providerDb
         this.intentWatcherDb = intentWatcherDb
         this.logger = logger
@@ -199,8 +196,8 @@ export class IntentResolver {
             await watcher_cursor.close()
             if (hasWatcher) {
                 try {
-                    const [metadata, spec, status] = await this.specDb.get_spec_status({...entry_ref.provider_reference, ...entry_ref.entity_reference})
-                    await this.onChange({ metadata, spec, status })
+                    const entity = await this.entityDb.get_entity({...entry_ref.provider_reference, ...entry_ref.entity_reference})
+                    await this.onChange(entity)
                 } catch (e) {
                     this.logger.debug(`Failed to process onChange in update active watcher status for entity with uuid: ${entry_ref.entity_reference.uuid} and kind: ${entry_ref.entity_reference.kind} for provider with prefix: ${entry_ref.provider_reference.provider_prefix} and version: ${entry_ref.provider_reference.provider_version} due to error: ${e}`)
                 }

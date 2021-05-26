@@ -58,8 +58,7 @@ async function setUpApplication(): Promise<express.Express> {
     await mongoConnection.connect();
     const differ = new BasicDiffer()
     const providerDb = await mongoConnection.get_provider_db(logger);
-    const specDb = await mongoConnection.get_spec_db(logger);
-    const statusDb = await mongoConnection.get_status_db(logger);
+    const entityDb = await mongoConnection.get_entity_db(logger);
     const s2skeyDb = await mongoConnection.get_s2skey_db(logger);
     const intentWatcherDB = await mongoConnection.get_intent_watcher_db(logger)
     const sessionKeyDb = await mongoConnection.get_session_key_db(logger)
@@ -68,9 +67,9 @@ async function setUpApplication(): Promise<express.Express> {
     const validator = ValidatorImpl.create()
     const entityApiAuthorizer: PerProviderAuthorizer = new PerProviderAuthorizer(logger, new ProviderCasbinAuthorizerFactory(logger));
     const adminAuthorizer: Authorizer = new AdminAuthorizer()
-    const intentWatcherAuthorizer: IntentWatcherAuthorizer = new IntentWatcherAuthorizer(logger, entityApiAuthorizer, specDb, providerDb);
-    const intentfulContext = new IntentfulContext(specDb, statusDb, graveyardDb, differ, intentWatcherDB, watchlistDb, validator, entityApiAuthorizer)
-    const providerApi = new Provider_API_Impl(logger, providerDb, statusDb, s2skeyDb, watchlistDb, intentfulContext, adminAuthorizer, [adminAuthorizer, entityApiAuthorizer], validator)
+    const intentWatcherAuthorizer: IntentWatcherAuthorizer = new IntentWatcherAuthorizer(logger, entityApiAuthorizer, entityDb, providerDb);
+    const intentfulContext = new IntentfulContext(entityDb, graveyardDb, differ, intentWatcherDB, watchlistDb, validator, entityApiAuthorizer)
+    const providerApi = new Provider_API_Impl(logger, providerDb, entityDb, s2skeyDb, watchlistDb, intentfulContext, adminAuthorizer, [adminAuthorizer, entityApiAuthorizer], validator)
     const sessionKeyApi = new SessionKeyAPI(sessionKeyDb)
     const userAuthInfoExtractor = new CompositeUserAuthInfoExtractor([
         new AdminUserAuthInfoExtractor(adminKey),
@@ -84,7 +83,7 @@ async function setUpApplication(): Promise<express.Express> {
     app.use(createAuthnRouter(logger, userAuthInfoExtractor));
     app.use(createOAuth2Router(logger, oauth2RedirectUri, providerDb, sessionKeyApi));
     app.use('/provider', createProviderAPIRouter(providerApi, trace));
-    app.use('/services', createEntityAPIRouter(new Entity_API_Impl(logger, statusDb, specDb, graveyardDb, providerDb, intentWatcherDB, entityApiAuthorizer, intentWatcherAuthorizer, validator, intentfulContext), trace));
+    app.use('/services', createEntityAPIRouter(new Entity_API_Impl(logger, entityDb, graveyardDb, providerDb, intentWatcherDB, entityApiAuthorizer, intentWatcherAuthorizer, validator, intentfulContext), trace));
     app.use('/api-docs', createAPIDocsRouter('/api-docs', new ApiDocsGenerator(providerDb), providerDb));
     app.use(function (err: any, req: any, res: any, next: any) {
         if (res.headersSent) {

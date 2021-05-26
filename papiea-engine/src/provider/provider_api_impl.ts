@@ -1,6 +1,5 @@
 import { Provider_API, Provider_Power } from "./provider_api_interface";
 import { Provider_DB } from "../databases/provider_db_interface";
-import { Status_DB } from "../databases/status_db_interface";
 import { S2S_Key_DB } from "../databases/s2skey_db_interface";
 import { Validator } from "../validator";
 import { Authorizer } from "../auth/authz";
@@ -14,10 +13,11 @@ import { SpecOnlyUpdateStrategy } from "../intentful_core/intentful_strategies/s
 import { IntentfulContext } from "../intentful_core/intentful_context";
 import { PapieaException, PapieaExceptionContextImpl } from "../errors/papiea_exception"
 import uuid = require("uuid");
+import { Entity_DB } from "../databases/entity_db_interface";
 
 export class Provider_API_Impl implements Provider_API {
     private providerDb: Provider_DB;
-    private statusDb: Status_DB;
+    private entityDb: Entity_DB;
     private s2skeyDb: S2S_Key_DB;
     private authorizer: Authorizer;
     private logger: Logger;
@@ -26,14 +26,14 @@ export class Provider_API_Impl implements Provider_API {
     private intentfulContext: IntentfulContext;
     private readonly registeredAuthorizers: Authorizer[]
 
-    constructor(logger: Logger, providerDb: Provider_DB, statusDb: Status_DB,
+    constructor(logger: Logger, providerDb: Provider_DB, entityDb: Entity_DB,
                 s2skeyDb: S2S_Key_DB, watchlistDb: Watchlist_DB,
                 intentfulContext: IntentfulContext, authorizer: Authorizer,
                 registeredAuthorizers: Authorizer[],
                 validator: Validator)
     {
         this.providerDb = providerDb;
-        this.statusDb = statusDb;
+        this.entityDb = entityDb;
         this.s2skeyDb = s2skeyDb;
         this.watchlistDb = watchlistDb
         this.intentfulContext = intentfulContext
@@ -110,9 +110,9 @@ export class Provider_API_Impl implements Provider_API {
         // e.g. partial status update: {name: {last: 'BBB'}}
         // Thus we get the merged version and validate it
         // Only after that we transform partial status into mongo dot notation query
-        const getStatusSpan = spanOperation(`get_status_db`,
+        const getStatusSpan = spanOperation(`get_entity_db`,
                                    ctx.tracing_ctx)
-        const [,currentStatus] = await this.statusDb.get_status(metadata)
+        const { status: currentStatus } = await this.entityDb.get_entity(metadata)
         getStatusSpan.finish()
         let mergedStatus: any
         // Replace status if dealing with arrays

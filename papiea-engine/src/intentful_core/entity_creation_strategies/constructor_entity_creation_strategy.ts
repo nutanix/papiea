@@ -13,8 +13,6 @@ import {
 import {OnActionError} from "../../errors/on_action_error"
 import axios from "axios"
 import {create_entry} from "../../intentful_engine/watchlist"
-import {Spec_DB} from "../../databases/spec_db_interface"
-import {Status_DB} from "../../databases/status_db_interface"
 import {Graveyard_DB} from "../../databases/graveyard_db_interface"
 import {IntentWatcher_DB} from "../../databases/intent_watcher_db_interface"
 import {Watchlist_DB} from "../../databases/watchlist_db_interface"
@@ -26,26 +24,27 @@ import uuid = require("uuid")
 import {RequestContext, spanOperation} from "papiea-backend-utils"
 import {UnauthorizedError} from "../../errors/permission_error"
 import {PapieaException} from "../../errors/papiea_exception"
+import { Entity_DB } from "../../databases/entity_db_interface"
 
 export class ConstructorEntityCreationStrategy extends EntityCreationStrategy {
     protected differ: Differ
     protected intentWatcherDb: IntentWatcher_DB
     protected watchlistDb: Watchlist_DB
 
-    constructor(specDb: Spec_DB, statusDb: Status_DB, graveyardDb: Graveyard_DB, watchlistDb: Watchlist_DB, validator: Validator, authorizer: Authorizer, differ: Differ, intentWatcherDb: IntentWatcher_DB) {
-        super(specDb, statusDb, graveyardDb, watchlistDb, validator, authorizer)
+    constructor(entityDb: Entity_DB, graveyardDb: Graveyard_DB, watchlistDb: Watchlist_DB, validator: Validator, authorizer: Authorizer, differ: Differ, intentWatcherDb: IntentWatcher_DB) {
+        super(entityDb, graveyardDb, watchlistDb, validator, authorizer)
         this.differ = differ
         this.intentWatcherDb = intentWatcherDb
         this.watchlistDb = watchlistDb
     }
 
-    protected async save_entity(entity: Entity): Promise<[Metadata, Spec, Status]> {
+    protected async save_entity(entity: Entity): Promise<Entity> {
         // Create increments spec version so we should check already incremented one
         await this.check_spec_version(entity.metadata, entity.metadata.spec_version + 1, entity.spec)
-        await this.specDb.update_spec(entity.metadata, entity.spec)
-        await this.statusDb.replace_status(entity.metadata, entity.status)
-        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(entity.metadata)
-        return [updatedMetadata, updatedSpec, updatedStatus]
+        await this.entityDb.update_spec(entity.metadata, entity.spec)
+        await this.entityDb.replace_status(entity.metadata, entity.status)
+        const updatedEntity = await this.entityDb.get_entity(entity.metadata)
+        return updatedEntity
     }
 
     public async create(input: any, ctx: RequestContext): Promise<EntityCreateOrUpdateResult> {
@@ -66,7 +65,7 @@ export class ConstructorEntityCreationStrategy extends EntityCreationStrategy {
         }
         const span = spanOperation(`save_entity_db`,
                                    ctx.tracing_ctx)
-        const [created_metadata, created_spec, created_status] = await this.save_entity(entity)
+        const { metadata: created_metadata, spec: created_spec, status: created_status} = await this.save_entity(entity)
         span.finish()
         let watcher: null | IntentWatcher = null
         if (!spec_status_equal && (this.kind.intentful_behaviour === IntentfulBehaviour.Differ || this.kind.intentful_behaviour === IntentfulBehaviour.Basic)) {

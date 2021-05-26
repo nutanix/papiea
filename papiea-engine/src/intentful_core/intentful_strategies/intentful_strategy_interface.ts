@@ -1,6 +1,4 @@
 import { Metadata, Spec, Kind, Entity, EntityCreateOrUpdateResult, Status } from "papiea-core"
-import { Spec_DB } from "../../databases/spec_db_interface"
-import { Status_DB } from "../../databases/status_db_interface"
 import { UserAuthInfo } from "../../auth/authn"
 import axios from "axios"
 import { OnActionError } from "../../errors/on_action_error";
@@ -10,17 +8,16 @@ import {
 } from "../../databases/utils/errors"
 import {RequestContext, spanOperation} from "papiea-backend-utils"
 import {UnauthorizedError} from "../../errors/permission_error"
+import { Entity_DB } from "../../databases/entity_db_interface"
 
 export abstract class IntentfulStrategy {
-    protected readonly specDb: Spec_DB
-    protected readonly statusDb: Status_DB
+    protected readonly entityDb: Entity_DB
     protected readonly graveyardDb: Graveyard_DB
     protected kind?: Kind
     protected user?: UserAuthInfo
 
-    protected constructor(specDb: Spec_DB, statusDb: Status_DB, graveyardDb: Graveyard_DB) {
-        this.specDb = specDb
-        this.statusDb = statusDb
+    protected constructor(entityDb: Entity_DB, graveyardDb: Graveyard_DB) {
+        this.entityDb = entityDb
         this.graveyardDb = graveyardDb
     }
 
@@ -33,12 +30,12 @@ export abstract class IntentfulStrategy {
         }
     }
 
-    async update_entity(metadata: Metadata, spec: Spec): Promise<[Metadata, Spec, Status]> {
+    async update_entity(metadata: Metadata, spec: Spec): Promise<Entity> {
         await this.check_spec_version(metadata, metadata.spec_version, spec)
-        await this.specDb.update_spec(metadata, spec);
-        await this.statusDb.update_status(metadata, spec)
-        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(metadata)
-        return [updatedMetadata, updatedSpec, updatedStatus]
+        await this.entityDb.update_spec(metadata, spec);
+        await this.entityDb.update_status(metadata, spec)
+        const updatedEntity = await this.entityDb.get_entity(metadata)
+        return updatedEntity
     }
 
     async delete_entity(entity: Entity): Promise<void> {
@@ -46,12 +43,10 @@ export abstract class IntentfulStrategy {
     }
 
     async update(metadata: Metadata, spec: Spec, ctx: RequestContext): Promise<EntityCreateOrUpdateResult> {
-        const [updatedMetadata, updatedSpec, updatedStatus] = await this.update_entity(metadata, spec)
+        const updatedEntity = await this.update_entity(metadata, spec)
         return {
             intent_watcher: null,
-            metadata: updatedMetadata,
-            spec: updatedSpec,
-            status: updatedStatus
+            ...updatedEntity
         }
     }
 

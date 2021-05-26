@@ -1,7 +1,5 @@
 import { IntentfulStrategy } from "./intentful_strategy_interface"
-import { Spec_DB } from "../../databases/spec_db_interface"
-import { Status_DB } from "../../databases/status_db_interface"
-import { Differ, Metadata, Spec, IntentWatcher, Status } from "papiea-core"
+import { Differ, Metadata, Spec, IntentWatcher, Status, Entity } from "papiea-core"
 import { IntentWatcher_DB } from "../../databases/intent_watcher_db_interface"
 import { EntityCreateOrUpdateResult, IntentfulStatus } from "papiea-core"
 import { Watchlist_DB } from "../../databases/watchlist_db_interface";
@@ -9,27 +7,28 @@ import uuid = require("uuid")
 import { create_entry } from "../../intentful_engine/watchlist";
 import { Graveyard_DB } from "../../databases/graveyard_db_interface"
 import {RequestContext, spanOperation} from "papiea-backend-utils"
+import { Entity_DB } from "../../databases/entity_db_interface"
 
 export class DifferIntentfulStrategy extends IntentfulStrategy {
     protected differ: Differ
     protected intentWatcherDb: IntentWatcher_DB
     protected watchlistDb: Watchlist_DB;
 
-    constructor(specDb: Spec_DB, statusDb: Status_DB, graveyardDb: Graveyard_DB, differ: Differ, intentWatcherDb: IntentWatcher_DB, watchlistDb: Watchlist_DB) {
-        super(specDb, statusDb, graveyardDb)
+    constructor(entityDb: Entity_DB, graveyardDb: Graveyard_DB, differ: Differ, intentWatcherDb: IntentWatcher_DB, watchlistDb: Watchlist_DB) {
+        super(entityDb, graveyardDb)
         this.differ = differ
         this.intentWatcherDb = intentWatcherDb
         this.watchlistDb = watchlistDb
     }
 
-    async update_entity(metadata: Metadata, spec: Spec): Promise<[Metadata, Spec, Status]> {
-        await this.specDb.update_spec(metadata, spec);
-        const [updatedMetadata, updatedSpec, updatedStatus] = await this.specDb.get_spec_status(metadata)
-        return [updatedMetadata, updatedSpec, updatedStatus]
+    async update_entity(metadata: Metadata, spec: Spec): Promise<Entity> {
+        await this.entityDb.update_spec(metadata, spec);
+        const updatedEntity = await this.entityDb.get_entity(metadata)
+        return updatedEntity
     }
 
     async update(metadata: Metadata, spec: Spec, ctx: RequestContext): Promise<EntityCreateOrUpdateResult> {
-        const statusSpan = spanOperation(`get_status_db`,
+        const statusSpan = spanOperation(`get_entity_db`,
                                    ctx.tracing_ctx,
                                    {entity_uuid: metadata.uuid})
         statusSpan.finish()
@@ -37,7 +36,7 @@ export class DifferIntentfulStrategy extends IntentfulStrategy {
         const updateSpan = spanOperation(`update_entity_db`,
                                    ctx.tracing_ctx,
                                    {entity_uuid: metadata.uuid})
-        const [updated_metadata, updated_spec, updated_status] = await this.update_entity(metadata, spec)
+        const updatedEntity = await this.update_entity(metadata, spec)
         // console.debug(`[DELAY_DEBUG] Updated the entity with uuid: ${metadata.uuid}`)
         updateSpan.finish()
         const watcher: IntentWatcher = {
@@ -53,7 +52,7 @@ export class DifferIntentfulStrategy extends IntentfulStrategy {
             user: this.user,
             status: IntentfulStatus.Active,
         }
-        for (let diff of this.differ.diffs(this.kind!, updated_spec, updated_status)) {
+        for (let diff of this.differ.diffs(this.kind!, updatedEntity.spec, updatedEntity.status)) {
             watcher.diffs.push(diff)
         }
         const watcherSpan = spanOperation(`create_watcher_db`,
@@ -73,9 +72,7 @@ export class DifferIntentfulStrategy extends IntentfulStrategy {
         // console.debug(`[DELAY_DEBUG] ${JSON.stringify(ent)}`)
         return {
             intent_watcher: watcher,
-            metadata: updated_metadata,
-            spec: updated_spec,
-            status: updated_status
+            ...updatedEntity
         }
     }
 }

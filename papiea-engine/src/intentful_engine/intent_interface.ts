@@ -1,4 +1,4 @@
-import { Metadata, Spec, IntentWatcher } from "papiea-core"
+import { IntentWatcher, Entity } from "papiea-core"
 import * as Async from "../utils/async"
 
 export class IntentWatcherMapper {
@@ -12,9 +12,9 @@ export class IntentWatcherMapper {
         }
     }
 
-    public static filter(intentWatchers: AsyncIterable<IntentWatcher>, entities: [Metadata, Spec][]): AsyncIterable<IntentWatcher> {
+    public static filter(intentWatchers: AsyncIterable<IntentWatcher>, entities: Entity[]): AsyncIterable<IntentWatcher> {
         return Async.filter(intentWatchers, async watcher =>
-            !!entities.find(entity => entity[0].uuid === watcher.entity_ref.uuid));
+            !!entities.find(entity => entity.metadata.uuid === watcher.entity_ref.uuid));
     }
 
     public static toResponses(intentWatchers: AsyncIterable<IntentWatcher>): AsyncIterable<Partial<IntentWatcher>> {
