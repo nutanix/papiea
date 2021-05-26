@@ -1,3 +1,5 @@
+- Version 0.10.0+9999: Fixed race condition in watchlist updates (#703)
+- Version 0.10.0+9999: Merge branch 'nitesh/add-https-endpoint-support'
 - Version 0.9.61+2275: Added interface methods to get and list spec/status
 - Version 0.9.60+2260: Fixed return type for update status in SDKs
 - Version 0.9.59+2257: Race condition fixes in master (#687) PR url: git@github.com:nutanix/papiea.git/pull/687
