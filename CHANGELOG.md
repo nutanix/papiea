@@ -1,3 +1,4 @@
+- Version 0.10.4+2306: Fix version update bug
 - Version 0.10.0+9999: Added interface methods to get and list spec/status (#699) PR url: git@github.com:nutanix/papiea.git/pull/699
 - Version 0.10.0+9999: Fixed race condition in watchlist updates (#703)
 - Version 0.10.0+9999: Merge branch 'nitesh/add-https-endpoint-support'
