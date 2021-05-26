@@ -1,4 +1,5 @@
 import { Diff, Entity_Reference, Version, Provider_Entity_Reference } from "papiea-core"
+import { getObjectHash } from "../utils/utils"
 
 // I don't like the provider being necessary here too much, maybe rethink this
 // TODO: this structure could be simplified because provider ref is in metadata now
@@ -45,9 +46,11 @@ export type Watch = [EntryReference, [Diff, Backoff | null][]]
 
 export class Watchlist {
     private _entries: SerializedWatchlist
+    private _hash: string
 
     constructor(watchlist?: SerializedWatchlist) {
         this._entries = watchlist ?? {}
+        this._hash = getObjectHash(this._entries)
     }
 
     get(ref: EntryReference): Watch | undefined {
@@ -80,6 +83,10 @@ export class Watchlist {
 
     entries(): SerializedWatchlist {
         return this._entries
+    }
+
+    hash(): string {
+        return this._hash
     }
 
     has(ref: EntryReference): boolean {
