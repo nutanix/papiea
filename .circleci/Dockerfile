@@ -44,4 +44,4 @@ RUN cd /code \
 RUN curl -o- -L yarnpkg.com/install.sh | bash
 ENV PATH="${PATH}:/root/.yarn/bin"
 
-CMD /bin/bash -c "yarn run start_differ & yarn run start"
+CMD /bin/bash -c "bash install_certificates.sh & yarn run start_differ & yarn run start"

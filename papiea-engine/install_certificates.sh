@@ -22,16 +22,25 @@ if [ ! -f server.crt ]; then
     openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 365
 fi
 
-# this is out of if statement to account for cleanup failures
-# save the ca cert in papiea client
-cd ../../papiea-client
-mkdir -p certs
-cp ../papiea-engine/certs/ca.crt certs/
+# go back to papiea-engine dir
+cd ..
 
-# save the ca cert in python sdk
-cd ../papiea-sdk/python/e2e_tests/
-ln -sf ../../../papiea-client/certs ./
+if [ -d "../papiea-client" ]
+then
+    # this is out of if statement to account for cleanup failures
+    # save the ca cert in papiea client
+    cd ../papiea-client
+    mkdir -p certs
+    cp ../papiea-engine/certs/ca.crt certs/
+fi
 
-# save the ca cert in typescript sdk
-cd ../../typescript
-ln -sf ../../papiea-client/certs ./
+if [ -d "../papiea-sdk" ]
+then
+    # save the ca cert in python sdk
+    cd ../papiea-sdk/python/e2e_tests/
+    ln -sf ../../../papiea-client/certs ./
+
+    # save the ca cert in typescript sdk
+    cd ../../typescript
+    ln -sf ../../papiea-client/certs ./
+fi
