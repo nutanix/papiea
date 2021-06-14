@@ -48,9 +48,9 @@ export class Watchlist {
     private _entries: SerializedWatchlist
     private _hash: string
 
-    constructor(watchlist?: SerializedWatchlist) {
+    constructor(watchlist?: SerializedWatchlist, hash?: string) {
         this._entries = watchlist ?? {}
-        this._hash = getObjectHash(this._entries)
+        this._hash = hash ?? getObjectHash(this._entries)
     }
 
     get(ref: EntryReference): Watch | undefined {
