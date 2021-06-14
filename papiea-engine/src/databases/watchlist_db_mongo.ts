@@ -10,6 +10,7 @@ const WATCHLIST_CONFLICT_MESSAGE = "Watchlist Conflict Error"
 type WatchlistResult = {
     id: number
     watchlist: SerializedWatchlist
+    hash: string
 }
 
 export class Watchlist_Db_Mongo implements Watchlist_DB {
@@ -54,8 +55,8 @@ export class Watchlist_Db_Mongo implements Watchlist_DB {
                 "hash": watchlist.hash()
             }, {
                 $set: {
-                    watchlist: watchlist.serialize(),
-                    hash: getObjectHash(watchlist.entries())
+                    "watchlist": watchlist.serialize(),
+                    "hash": getObjectHash(watchlist.entries())
                 }
             }, {
                 upsert: true
@@ -65,7 +66,7 @@ export class Watchlist_Db_Mongo implements Watchlist_DB {
             if (err.code === 11000) {
                 throw new PapieaException({ message: WATCHLIST_CONFLICT_MESSAGE });
             } else {
-                throw new PapieaException({ message: `MongoDBError: Something went wrong in update watchlist.`, cause: err}) 
+                throw new PapieaException({ message: `MongoDBError: Something went wrong in update watchlist.`, cause: err})
             }
         }
         if (result!.result.n !== 1) {
@@ -82,6 +83,6 @@ export class Watchlist_Db_Mongo implements Watchlist_DB {
             await this.update_watchlist(watchlist)
             return watchlist
         }
-        return new Watchlist(result.watchlist)
+        return new Watchlist(result.watchlist, result.hash)
     }
 }
