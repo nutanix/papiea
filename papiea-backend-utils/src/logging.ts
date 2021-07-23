@@ -189,30 +189,30 @@ class LoggerImpl implements Logger {
     }
 
     emerg(msg: any, ...messages: any[]): void {
-        this._logger.emerg(msg, ...messages)
+        this._logger.emerg({...messages}, msg)
     }
     alert(msg: any, ...messages: any[]): void {
-        this._logger.alert(msg, ...messages)
+        this._logger.alert({...messages}, msg)
     }
     crit(msg: any, ...messages: any[]): void {
-        this._logger.crit(msg, ...messages)
+        this._logger.crit({...messages}, msg)
     }
     error(msg: any, ...messages: any[]): void {
-        this._logger.error(msg, ...messages)
+        this._logger.error({...messages}, msg)
     }
     audit(msg: any, ...messages: any[]): void {
-        this._logger.audit(msg, ...messages)
+        this._logger.audit({...messages}, msg)
     }
     warn(msg: any, ...messages: any[]): void {
-        this._logger.warn(msg, ...messages)
+        this._logger.warn({...messages}, msg)
     }
     notice(msg: any, ...messages: any[]): void {
-        this._logger.notice(msg, ...messages)
+        this._logger.notice({...messages}, msg)
     }
     info(msg: any, ...messages: any[]): void {
-        this._logger.info(msg, ...messages)
+        this._logger.info({...messages}, msg)
     }
     debug(msg: any, ...messages: any[]): void {
-        this._logger.debug(msg, ...messages)
+        this._logger.debug({...messages}, msg)
     }
 }
