@@ -13,7 +13,7 @@ multidict==4.7.6
 opentracing==2.4.0
 packaging==20.4
 pluggy==0.13.1
-py==1.9.0
+py==1.10.0
 pycrypto==2.6.1
 pyparsing==2.4.7
 pytest==5.4.3
