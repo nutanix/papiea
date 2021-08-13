@@ -11,7 +11,7 @@
   "author": "Shlomi Vaknin",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "opentracing": "^0.14.5",
     "papiea-backend-utils": "file:../papiea-backend-utils",
     "papiea-core": "file:../papiea-core"
