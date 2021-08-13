@@ -1,0 +1,20 @@
+yarn version v1.22.5
+info Current version: 0.10.16
+info New version: 0.10.16+9999
+Done in 0.05s.
+yarn version v1.22.5
+info Current version: 0.10.16
+info New version: 0.10.16+9999
+Done in 0.04s.
+yarn version v1.22.5
+info Current version: 0.10.16
+info New version: 0.10.16+9999
+Done in 0.05s.
+yarn version v1.22.5
+info Current version: 0.10.16
+info New version: 0.10.16+9999
+Done in 0.07s.
+yarn version v1.22.5
+info Current version: 0.10.16
+info New version: 0.10.16+9999
+Done in 0.05s.
