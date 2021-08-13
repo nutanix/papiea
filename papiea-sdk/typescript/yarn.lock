@@ -340,12 +340,12 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.9.1.tgz#7e33d8f7d449b3f673cd72deb9abdc552dbe528e"
   integrity sha512-wMHVg2EOHaMRxbzgFJ9gtjOOCrI80OHLG14rxi28XwOW8ux6IiEbRCGGGqCtdAIg4FQCbW20k9RsT4y3gJlFug==
 
-axios@*:
-  version "0.19.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.19.2.tgz#3ea36c5d8818d0d5f8a8a97a6d36b86cdc00cb27"
-  integrity sha512-fjgm5MvRHLhx+osE2xoekY70AhARk3a6hkN+3Io1jc00jtquGvxYlKlsFUhmUET0V5te6CcZI7lcv2Ym61mjHA==
+axios@*, axios@^0.21.1:
+  version "0.21.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.1.tgz#22563481962f4d6bde9a76d516ef0e5d3c09b2b8"
+  integrity sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==
   dependencies:
-    follow-redirects "1.5.10"
+    follow-redirects "^1.10.0"
 
 axios@^0.18.1:
   version "0.18.1"
@@ -1400,6 +1400,11 @@ follow-redirects@1.5.10:
   integrity sha512-0V5l4Cizzvqt5D44aTXbFZz+FtyXV1vrDN6qrelxtfYQKW0KO0W2T/hkE8xvGa/540LkZlkaUjO4ailYTFtHVQ==
   dependencies:
     debug "=3.1.0"
+
+follow-redirects@^1.10.0:
+  version "1.14.1"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.1.tgz#d9114ded0a1cfdd334e164e6662ad02bfd91ff43"
+  integrity sha512-HWqDgT7ZEkqRzBvc2s64vSZ/hfOceEol3ac/7tKwzuvEyWx3/4UegXh5oBOIotkGsObyk3xznnSRVADBgWSQVg==
 
 for-in@^1.0.1, for-in@^1.0.2:
   version "1.0.2"
@@ -3037,7 +3042,7 @@ p-try@^1.0.0:
   integrity sha1-y8ec26+P1CKOE/Yh8rGiN8GyB7M=
 
 "papiea-backend-utils@file:../../papiea-backend-utils":
-  version "0.9.9"
+  version "0.10.15"
   dependencies:
     "@types/express" "^4.17.9"
     "@types/jaeger-client" "^3.15.4"
@@ -3045,17 +3050,19 @@ p-try@^1.0.0:
     jaeger-client "^3.18.1"
     logform "^2.1.2"
     opentracing "^0.14.5"
-    papiea-core "file:../../../../Library/Caches/Yarn/v6/npm-papiea-backend-utils-0.9.9-b0530768-7a05-4168-8544-2f9e70621b74-1609940471084/node_modules/papiea-core"
+    papiea-core "file:../../papiea-core"
     winston "^3.3.3"
 
 "papiea-client@file:../../papiea-client":
-  version "0.9.9"
+  version "0.10.15"
   dependencies:
     axios "^0.18.1"
-    papiea-core "file:../../../../Library/Caches/Yarn/v6/npm-papiea-client-0.9.9-31246b27-e9e1-4f86-8f50-60565499fc88-1609940475562/node_modules/papiea-core"
+    opentracing "^0.14.5"
+    papiea-backend-utils "file:../../papiea-backend-utils"
+    papiea-core "file:../../papiea-core"
 
 "papiea-core@file:../../papiea-core":
-  version "0.9.9"
+  version "0.10.15"
 
 parse-glob@^3.0.4:
   version "3.0.4"
