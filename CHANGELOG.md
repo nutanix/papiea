@@ -1,3 +1,4 @@
+- Version 0.10.18+2447: Remove temp version file (version update commit)
 - Version 0.10.16+9999: Fix papiea version
 - Version 0.10.12+9999: Fix CircleCI SSH key
 - Version 0.10.5+2313: Added flag to disable https in papiea engine (#706)
