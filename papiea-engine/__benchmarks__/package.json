@@ -20,7 +20,7 @@
     "papiea-sdk": "file:../../papiea-sdk/typescript",
     "papiea-core": "file:../../papiea-core",
     "autocannon": "^4.6.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "ts-node": "^7.0.1",
     "typescript": "^4.1"
   },
