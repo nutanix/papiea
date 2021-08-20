@@ -1632,9 +1632,9 @@ home-or-tmp@^2.0.0:
     os-tmpdir "^1.0.1"
 
 hosted-git-info@^2.1.4:
-  version "2.8.8"
-  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.8.tgz#7539bd4bc1e0e0a895815a2e0262420b12858488"
-  integrity sha512-f/wzC2QaWBs7t9IYqB4T3sR1xviIViXJRJTWBlx2Gf3g0Xi5vI7Yy4koXQ1c9OYDGHN9sBy1DQ2AB8fqZBWhUg==
+  version "2.8.9"
+  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.9.tgz#dffc0bf9a21c02209090f2aa69429e1414daf3f9"
+  integrity sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==
 
 html-encoding-sniffer@^1.0.2:
   version "1.0.2"
@@ -3037,7 +3037,7 @@ p-try@^1.0.0:
   integrity sha1-y8ec26+P1CKOE/Yh8rGiN8GyB7M=
 
 "papiea-backend-utils@file:../../papiea-backend-utils":
-  version "0.9.9"
+  version "0.10.15"
   dependencies:
     "@types/express" "^4.17.9"
     "@types/jaeger-client" "^3.15.4"
@@ -3045,17 +3045,19 @@ p-try@^1.0.0:
     jaeger-client "^3.18.1"
     logform "^2.1.2"
     opentracing "^0.14.5"
-    papiea-core "file:../../../../Library/Caches/Yarn/v6/npm-papiea-backend-utils-0.9.9-b0530768-7a05-4168-8544-2f9e70621b74-1609940471084/node_modules/papiea-core"
+    papiea-core "file:../../papiea-core"
     winston "^3.3.3"
 
 "papiea-client@file:../../papiea-client":
-  version "0.9.9"
+  version "0.10.15"
   dependencies:
     axios "^0.18.1"
-    papiea-core "file:../../../../Library/Caches/Yarn/v6/npm-papiea-client-0.9.9-31246b27-e9e1-4f86-8f50-60565499fc88-1609940475562/node_modules/papiea-core"
+    opentracing "^0.14.5"
+    papiea-backend-utils "file:../../papiea-backend-utils"
+    papiea-core "file:../../papiea-core"
 
 "papiea-core@file:../../papiea-core":
-  version "0.9.9"
+  version "0.10.15"
 
 parse-glob@^3.0.4:
   version "3.0.4"
