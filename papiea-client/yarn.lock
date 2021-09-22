@@ -3150,7 +3150,7 @@ p-try@^2.0.0:
   integrity sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==
 
 "papiea-backend-utils@file:../papiea-backend-utils":
-  version "0.9.9"
+  version "0.10.18"
   dependencies:
     "@types/express" "^4.17.9"
     "@types/jaeger-client" "^3.15.4"
@@ -3158,11 +3158,11 @@ p-try@^2.0.0:
     jaeger-client "^3.18.1"
     logform "^2.1.2"
     opentracing "^0.14.5"
-    papiea-core "file:../../../Library/Caches/Yarn/v6/npm-papiea-backend-utils-0.9.9-f26508f2-fae5-4bc2-819b-41e9f690a39a-1610962992883/node_modules/papiea-core"
+    papiea-core "file:../papiea-core"
     winston "^3.3.3"
 
 "papiea-core@file:../papiea-core":
-  version "0.9.9"
+  version "0.10.18"
 
 parse-json@^5.0.0:
   version "5.0.0"
@@ -3958,9 +3958,9 @@ throat@^5.0.0:
   integrity sha512-fcwX4mndzpLQKBS1DVYhGAcYaYt7vsHNIvQV+WXMvnow5cgjPphq5CaayLaGsjRdSCKZFNGt7/GYAuXaNOiYCA==
 
 tmpl@1.0.x:
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/tmpl/-/tmpl-1.0.4.tgz#23640dd7b42d00433911140820e5cf440e521dd1"
-  integrity sha1-I2QN17QtAEM5ERQIIOXPRA5SHdE=
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/tmpl/-/tmpl-1.0.5.tgz#8683e0b902bb9c20c4f726e3c0b69f36518c07cc"
+  integrity sha512-3f0uOEAQwIqGuWW2MVzYg8fV/QNnc/IpuJNG837rLuczAaLVHslWHZQj4IGiEl5Hs3kkbhwL9Ab7Hrsmuj+Smw==
 
 to-fast-properties@^2.0.0:
   version "2.0.0"
