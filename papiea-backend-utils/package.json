@@ -16,7 +16,7 @@
   "dependencies": {
     "@types/express": "^4.17.9",
     "@types/jaeger-client": "^3.15.4",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "jaeger-client": "^3.18.1",
     "logform": "^2.1.2",
     "opentracing": "^0.14.5",
