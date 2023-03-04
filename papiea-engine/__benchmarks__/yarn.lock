@@ -752,9 +752,9 @@ mime@1.6.0:
   integrity sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==
 
 minimist@^1.1.0, minimist@^1.2.0, minimist@^1.2.5:
-  version "1.2.5"
-  resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
-  integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.8.tgz#c1a464e7693302e082a075cee0c057741ac4772c"
+  integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
 
 mkdirp@^0.5.1:
   version "0.5.5"
@@ -823,7 +823,7 @@ pako@^1.0.3:
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
 "papiea-backend-utils@file:../../papiea-backend-utils":
-  version "0.9.9"
+  version "0.10.18"
   dependencies:
     "@types/express" "^4.17.9"
     "@types/jaeger-client" "^3.15.4"
@@ -831,28 +831,30 @@ pako@^1.0.3:
     jaeger-client "^3.18.1"
     logform "^2.1.2"
     opentracing "^0.14.5"
-    papiea-core "file:../../../../Library/Caches/Yarn/v6/npm-papiea-backend-utils-0.9.9-e26a11f2-bd79-4f86-a262-02563b570051-1610378230301/node_modules/papiea-core"
+    papiea-core "file:../../papiea-core"
     winston "^3.3.3"
 
 "papiea-client@file:../../papiea-client":
-  version "0.9.9"
+  version "0.10.18"
   dependencies:
     axios "^0.18.1"
-    papiea-core "file:../../../../Library/Caches/Yarn/v6/npm-papiea-client-0.9.9-958efc32-c342-47fe-957d-00e739b0fe5f-1610378230238/node_modules/papiea-core"
+    opentracing "^0.14.5"
+    papiea-backend-utils "file:../../papiea-backend-utils"
+    papiea-core "file:../../papiea-core"
 
 "papiea-core@file:../../papiea-core":
-  version "0.9.9"
+  version "0.10.18"
 
 "papiea-sdk@file:../../papiea-sdk/typescript":
-  version "0.9.9"
+  version "0.10.18"
   dependencies:
     axios "^0.18.1"
     express "^4.17.0"
     express-async-handler "^1.1.4"
     js-yaml "^3.12.0"
-    papiea-backend-utils "file:../../../../Library/Caches/Yarn/v6/npm-papiea-sdk-0.9.9-6f73771c-cdde-4eff-8352-85200dfa9bf6-1610378230247/papiea-backend-utils"
-    papiea-client "file:../../../../Library/Caches/Yarn/v6/npm-papiea-sdk-0.9.9-6f73771c-cdde-4eff-8352-85200dfa9bf6-1610378230247/papiea-client"
-    papiea-core "file:../../../../Library/Caches/Yarn/v6/npm-papiea-sdk-0.9.9-6f73771c-cdde-4eff-8352-85200dfa9bf6-1610378230247/papiea-core"
+    papiea-backend-utils "file:../../papiea-backend-utils"
+    papiea-client "file:../../papiea-client"
+    papiea-core "file:../../papiea-core"
     pluralize "^7.0.0"
     swagger-model-validator "^3.0.20"
     uuid "^3.3.2"
